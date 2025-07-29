@@ -13,26 +13,23 @@ import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor 
-public class UserService implements UserDetailsService{
+public class UserService implements UserDetailsService {
     
-    @Autowired
-    private UserRepository repository;
+    private final UserRepository repository;
     
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        
-        Optional<AppUser> user = repository.findByUsername(username);
-        if (user.isPresent()) {
-            var userObj = user.get();
-            return User.builder()
-                    .username(userObj.getUsername())
-                    .password(userObj.getPassword())
-                    .build();    
-        }else{
+        AppUser user = repository.findByEmail(username);
+        if (user == null) {
             throw new UsernameNotFoundException(username);
         }
+        
+        return User.builder()
+                .username(user.getEmail()) // Using email as username
+                .password(user.getPassword())
+                .authorities("ROLE_USER") // Add appropriate authorities
+                .build();
     }
-    
-    
+
     
 }
