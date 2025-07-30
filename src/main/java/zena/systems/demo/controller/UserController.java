@@ -1,7 +1,7 @@
 package zena.systems.demo.controller;
 
 import zena.systems.demo.model.AppUser;
-import zena.systems.demo.dto.UserDto;
+import zena.systems.demo.dto.AuthedUserDto;
 import zena.systems.demo.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ public class UserController {
     }
 
   @GetMapping("/me")
-public ResponseEntity<UserDto> authenticatedUser() {
+public ResponseEntity<AuthedUserDto> authenticatedUser() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     System.out.println("Authentication object: " + authentication);
 
@@ -36,8 +36,8 @@ public ResponseEntity<UserDto> authenticatedUser() {
     System.out.println("Principal content: " + principal.toString());
 
     if (principal instanceof AppUser currentUser) {
-        UserDto dto = new UserDto(currentUser.getUsername(), currentUser.getEmail());
-        System.out.println("Returning UserDto: " + dto.getUsername() + ", " + dto.getEmail());
+        AuthedUserDto dto = new AuthedUserDto(currentUser.getUsername(), currentUser.getEmail());
+        System.out.println("Returning AuthedUserDto: " + dto.getUsername() + ", " + dto.getEmail());
         return ResponseEntity.ok(dto);
     } else {
         System.out.println("Principal is not an instance of AppUser");

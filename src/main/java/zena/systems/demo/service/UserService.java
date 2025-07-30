@@ -19,4 +19,6 @@ public class UserService {
         userRepository.findAll().forEach(users::add);
         return users;
     }
+
+   
 }
