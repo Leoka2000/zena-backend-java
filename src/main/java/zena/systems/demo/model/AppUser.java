@@ -37,6 +37,7 @@ public class AppUser implements UserDetails {
         this.email = email;
         this.password = password;
     }
+    
     //default constructor
     public AppUser(){
     }
@@ -51,6 +52,11 @@ public class AppUser implements UserDetails {
     public boolean isAccountNonExpired() {
         return true;
     }
+
+    @Override
+public String toString() {
+    return "AppUser{username='" + username + "', email='" + email + "'}";
+}
 
     @Override
     public boolean isAccountNonLocked() {
