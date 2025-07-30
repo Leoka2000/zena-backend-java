@@ -10,6 +10,9 @@
     import org.springframework.http.ResponseEntity;
     import org.springframework.web.bind.annotation.*;
 
+    import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
     @RequestMapping("/auth")
     @RestController
     public class AuthenticationController {
@@ -54,5 +57,11 @@
             } catch (RuntimeException e) {
                 return ResponseEntity.badRequest().body(e.getMessage());
             }
+        }
+       
+        @PostMapping("/logout")
+        public ResponseEntity<String> logout() {
+            // Simple response - in JWT systems, logout is primarily client-side
+            return ResponseEntity.ok("Logged out successfully");
         }
     }

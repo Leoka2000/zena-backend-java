@@ -35,13 +35,21 @@ public class AuthenticationService {
     }
 
     public AppUser signup(RegisterUserDto input) {
-        AppUser user = new AppUser(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
-        user.setVerificationCode(generateVerificationCode());
-        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
-        user.setEnabled(false);
-        sendVerificationEmail(user);
-        return userRepository.save(user);
+    if (userRepository.findByUsername(input.getUsername()).isPresent()) {
+        throw new RuntimeException("Username already exists");
     }
+
+    if (userRepository.findByEmail(input.getEmail()).isPresent()) {
+        throw new RuntimeException("Email already exists");
+    }
+
+    AppUser user = new AppUser(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
+    user.setVerificationCode(generateVerificationCode());
+    user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+    user.setEnabled(false);
+    sendVerificationEmail(user);
+    return userRepository.save(user);
+}
 
     public AppUser authenticate(LoginUserDto input) {
         AppUser user = userRepository.findByEmail(input.getEmail())
