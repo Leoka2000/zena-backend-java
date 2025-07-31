@@ -10,8 +10,6 @@
     import org.springframework.http.ResponseEntity;
     import org.springframework.web.bind.annotation.*;
 
-    import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
     @RequestMapping("/auth")
     @RestController
@@ -38,6 +36,8 @@ import jakarta.servlet.http.HttpServletResponse;
             LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
             return ResponseEntity.ok(loginResponse);
         }
+
+        
 
         @PostMapping("/verify")
         public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDto verifyUserDto) {

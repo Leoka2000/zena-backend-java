@@ -1,5 +1,4 @@
 package zena.systems.demo.service;
-import zena.systems.demo.service.EmailService;
 import zena.systems.demo.dto.LoginUserDto;
 import zena.systems.demo.dto.RegisterUserDto;
 import zena.systems.demo.dto.VerifyUserDto;

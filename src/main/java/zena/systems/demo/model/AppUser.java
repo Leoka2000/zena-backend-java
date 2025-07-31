@@ -53,11 +53,7 @@ public class AppUser implements UserDetails {
         return true;
     }
 
-    @Override
-public String toString() {
-    return "AppUser{username='" + username + "', email='" + email + "'}";
-}
-
+   
     @Override
     public boolean isAccountNonLocked() {
         return true;
