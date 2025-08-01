@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import zena.systems.demo.dto.ChangePasswordDto;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import org.springframework.http.HttpHeaders;
 import java.util.Map;
 
@@ -99,5 +102,30 @@ public class UserController {
 
     }
 
-    // Duplicate updateCurrentUser method removed to resolve compilation error.
+    @PatchMapping("/me/password")
+public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDto dto) {
+    try {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        AppUser currentUser = (AppUser) authentication.getPrincipal();
+
+        userService.changePassword(
+                currentUser.getId(),
+                dto.getCurrentPassword(),
+                dto.getNewPassword(),
+                dto.getConfirmPassword()
+        );
+
+        return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
+    } catch (RuntimeException e) {
+        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    } catch (Exception e) {
+        logger.error("Unexpected error during password change", e);
+        return ResponseEntity.internalServerError().body(Map.of("error", "Failed to change password"));
+    }
+}
 }
