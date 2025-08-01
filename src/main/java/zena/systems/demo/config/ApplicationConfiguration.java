@@ -1,6 +1,5 @@
 package zena.systems.demo.config;
 
-
 import zena.systems.demo.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,17 +14,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Configuration
 public class ApplicationConfiguration {
     private final UserRepository userRepository;
+
     public ApplicationConfiguration(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-   @Bean
-UserDetailsService userDetailsService() {
-    return identifier -> 
-        userRepository.findByEmail(identifier)
-            .or(() -> userRepository.findByUsername(identifier))
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-}
+    @Bean
+
+    UserDetailsService userDetailsService() {
+        return identifier -> userRepository.findByEmail(identifier)
+                .or(() -> userRepository.findByUsername(identifier))
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
 
     @Bean
     BCryptPasswordEncoder passwordEncoder() {
