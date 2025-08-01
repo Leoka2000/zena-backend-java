@@ -37,7 +37,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/users/me").authenticated()
-                        .requestMatchers("/api/temperature/**").authenticated() // Changed from permitAll to
+                        .requestMatchers("/api/temperature/**").authenticated() 
+                         .requestMatchers("/api/accelerometer/**").authenticated() // Changed from permitAll to
                                                                                 // authenticated
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session

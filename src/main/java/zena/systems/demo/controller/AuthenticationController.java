@@ -1,11 +1,11 @@
     package zena.systems.demo.controller;
 
-    import zena.systems.demo.dto.LoginUserDto;
+    import zena.systems.demo.dto.LoginResponse;
+import zena.systems.demo.dto.LoginUserDto;
     import zena.systems.demo.dto.RegisterUserDto;
     import zena.systems.demo.dto.VerifyUserDto;
     import zena.systems.demo.model.AppUser;
-    import zena.systems.demo.responses.LoginResponse;
-    import zena.systems.demo.service.AuthenticationService;
+import zena.systems.demo.service.AuthenticationService;
     import zena.systems.demo.service.JwtService;
     import org.springframework.http.ResponseEntity;
     import org.springframework.web.bind.annotation.*;

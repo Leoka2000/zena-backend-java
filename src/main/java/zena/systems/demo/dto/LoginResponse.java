@@ -1,4 +1,4 @@
-package zena.systems.demo.responses;
+package zena.systems.demo.dto;
 
 import lombok.Getter;
 import lombok.Setter;
