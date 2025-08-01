@@ -22,7 +22,7 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-    
+
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -30,8 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public JwtAuthenticationFilter(
             JwtService jwtService,
             UserDetailsService userDetailsService,
-            HandlerExceptionResolver handlerExceptionResolver
-    ) {
+            HandlerExceptionResolver handlerExceptionResolver) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
         this.handlerExceptionResolver = handlerExceptionResolver;
@@ -41,8 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
         logger.debug("=== JWT Authentication Filter Start ===");
         logger.debug("Processing request to: {}", request.getRequestURI());
 
@@ -58,9 +56,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             final String jwt = authHeader.substring(7);
-            logger.debug("Extracted JWT token: {}", jwt.substring(0, Math.min(jwt.length(), 10)) + "..."); // Log first 10 chars
+            logger.debug("Extracted JWT token: {}", jwt.substring(0, Math.min(jwt.length(), 10)) + "..."); // Log first
+                                                                                                           // 10 chars
 
             final String userEmail = jwtService.extractUsername(jwt);
+            final Long userId = jwtService.extractClaim(jwt, claims -> claims.get("userId", Long.class));
+
             logger.debug("Extracted user email from token: {}", userEmail);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -68,17 +69,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (userEmail != null && authentication == null) {
                 logger.debug("Attempting to load user details for: {}", userEmail);
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(
+                        userId.toString() // Now using ID instead of email
+                );
                 logger.debug("Loaded user details: {}", userDetails.getUsername());
 
                 if (jwtService.isTokenValid(jwt, userDetails)) {
                     logger.debug("Token is valid for user: {}", userDetails.getUsername());
-                    
+
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            userDetails.getAuthorities()
-                    );
+                            userDetails.getAuthorities());
                     logger.debug("Created authentication token with authorities: {}", userDetails.getAuthorities());
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
