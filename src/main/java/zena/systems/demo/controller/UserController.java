@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import zena.systems.demo.dto.ChangePasswordDto;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 
 import org.springframework.http.HttpHeaders;
 import java.util.Map;
