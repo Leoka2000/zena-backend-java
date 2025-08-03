@@ -23,11 +23,16 @@ public class TemperatureController {
         return ResponseEntity.ok("Data received successfully");
     }
 
-    @GetMapping("/history")
-    public ResponseEntity<List<TemperatureResponseDto>> getTemperatureHistory() {
-        List<TemperatureResponseDto> history = temperatureService.getTemperatureHistory();
-        return ResponseEntity.ok(history);
+   @GetMapping("/history")
+public ResponseEntity<List<TemperatureResponseDto>> getTemperatureHistory(
+        @RequestParam(required = false) String range) {
+
+    if (range == null || range.isEmpty()) {
+        return ResponseEntity.ok(temperatureService.getAllTemperatureHistory());
     }
+
+    return ResponseEntity.ok(temperatureService.getTemperatureHistory(range));
+}
 
     @GetMapping("/debug")
     public String debugAuth() {

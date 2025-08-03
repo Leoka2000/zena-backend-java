@@ -30,12 +30,32 @@ public class TemperatureService {
         logger.info("Received Temperature Data: {}", requestDTO);
     }
 
-    public List<TemperatureResponseDto> getTemperatureHistory() {
-        List<Temperature> temperatures = temperatureRepository.findAllByOrderByTimestampAsc();
-        
+    public List<TemperatureResponseDto> getTemperatureHistory(String range) {
+        Long fromTimestamp = calculateFromTimestamp(range);
+        List<Temperature> temperatures = temperatureRepository
+            .findByTimestampGreaterThanEqualOrderByTimestampAsc(fromTimestamp);
+
         return temperatures.stream()
-                .map(this::convertToResponseDTO)
-                .collect(Collectors.toList());
+            .map(this::convertToResponseDTO)
+            .collect(Collectors.toList());
+    }
+
+    public List<TemperatureResponseDto> getAllTemperatureHistory() {
+        List<Temperature> temperatures = temperatureRepository.findAllByOrderByTimestampAsc();
+
+        return temperatures.stream()
+            .map(this::convertToResponseDTO)
+            .collect(Collectors.toList());
+    }
+
+    private Long calculateFromTimestamp(String range) {
+        Instant now = Instant.now();
+        return switch (range) {
+            case "week" -> now.minusSeconds(7 * 24 * 60 * 60).getEpochSecond();
+            case "month" -> now.minusSeconds(30L * 24 * 60 * 60).getEpochSecond();
+            case "3months" -> now.minusSeconds(90L * 24 * 60 * 60).getEpochSecond();
+            default -> now.minusSeconds(24 * 60 * 60).getEpochSecond(); // default to day
+        };
     }
 
     private TemperatureResponseDto convertToResponseDTO(Temperature temperature) {

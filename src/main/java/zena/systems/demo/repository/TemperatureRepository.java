@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface TemperatureRepository extends JpaRepository<Temperature, Long> {
- List<Temperature> findAllByOrderByTimestampAsc();  // New method to get all records sorted
+    List<Temperature> findAllByOrderByTimestampAsc();  // Unfiltered full history
+    List<Temperature> findByTimestampGreaterThanEqualOrderByTimestampAsc(Long fromTimestamp);  // Filtered
 }
