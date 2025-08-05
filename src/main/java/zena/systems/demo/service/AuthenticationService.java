@@ -2,6 +2,7 @@ package zena.systems.demo.service;
 import zena.systems.demo.dto.LoginUserDto;
 import zena.systems.demo.dto.RegisterUserDto;
 import zena.systems.demo.dto.VerifyUserDto;
+import zena.systems.demo.exceptions.RegistrationException;
 import zena.systems.demo.model.AppUser;
 import zena.systems.demo.repository.UserRepository;
 import jakarta.mail.MessagingException;
@@ -33,13 +34,13 @@ public class AuthenticationService {
         this.emailService = emailService;
     }
 
-    public AppUser signup(RegisterUserDto input) {
+   public AppUser signup(RegisterUserDto input) {
     if (userRepository.findByUsername(input.getUsername()).isPresent()) {
-        throw new RuntimeException("Username already exists");
+        throw new RegistrationException("Username already exists");
     }
 
     if (userRepository.findByEmail(input.getEmail()).isPresent()) {
-        throw new RuntimeException("Email already exists");
+        throw new RegistrationException("Email already exists");
     }
 
     AppUser user = new AppUser(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
