@@ -31,6 +31,10 @@ public class AppUser implements UserDetails {
     private LocalDateTime verificationCodeExpiresAt;
     private boolean enabled;
 
+        // New field
+    @Column(name = "has_created_first_device", nullable = false)
+    private boolean hasCreatedFirstDevice = false;
+
     //constructor for creating an unverified user
     public AppUser(String username, String email, String password) {
         this.username = username;
@@ -54,6 +58,11 @@ public class AppUser implements UserDetails {
     }
 
    
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
     @Override
     public boolean isAccountNonLocked() {
         return true;

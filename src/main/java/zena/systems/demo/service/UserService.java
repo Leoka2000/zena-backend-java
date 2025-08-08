@@ -69,4 +69,10 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public boolean hasUserCreatedFirstDevice(Long userId) {
+        AppUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.isHasCreatedFirstDevice();
+    }
+
 }
