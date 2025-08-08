@@ -9,5 +9,5 @@ public class DeviceRequestDto {
     private String serviceUuid;
     private String readNotifyCharacteristicUuid;
     private String writeCharacteristicUuid;
+    private String name;
 }
-

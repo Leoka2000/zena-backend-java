@@ -25,6 +25,7 @@ public class DeviceService {
         device.setServiceUuid(dto.getServiceUuid());
         device.setReadNotifyCharacteristicUuid(dto.getReadNotifyCharacteristicUuid());
         device.setWriteCharacteristicUuid(dto.getWriteCharacteristicUuid());
+        device.setName(dto.getName());
         device.setUser(currentUser);
 
         Device saved = deviceRepository.save(device);
@@ -49,6 +50,7 @@ public class DeviceService {
     private DeviceResponseDto mapToDto(Device device) {
         DeviceResponseDto dto = new DeviceResponseDto();
         dto.setId(device.getId());
+        dto.setName(device.getName());
         dto.setServiceUuid(device.getServiceUuid());
         dto.setReadNotifyCharacteristicUuid(device.getReadNotifyCharacteristicUuid());
         dto.setWriteCharacteristicUuid(device.getWriteCharacteristicUuid());
