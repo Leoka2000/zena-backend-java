@@ -1,10 +1,16 @@
 package zena.systems.demo.service;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import jakarta.transaction.Transactional;
 import zena.systems.demo.dto.DeviceRequestDto;
 import zena.systems.demo.dto.DeviceResponseDto;
+import zena.systems.demo.dto.DeviceUpdateRequestDto;
 import zena.systems.demo.model.AppUser;
 import zena.systems.demo.model.Device;
 import zena.systems.demo.repository.DeviceRepository;
@@ -57,9 +63,48 @@ public class DeviceService {
         return dto;
     }
 
+    public DeviceResponseDto getDeviceById(Long id) {
+        AppUser currentUser = getCurrentUser();
+
+        Device device = deviceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
+
+        // Check if the device belongs to the current user
+        if (!device.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this device");
+        }
+
+        return mapToDto(device);
+    }
+
     private AppUser getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
+
+    @Transactional
+    public DeviceResponseDto updateDevice(Long id, DeviceUpdateRequestDto dto) {
+        AppUser currentUser = getCurrentUser();
+
+        Device device = deviceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
+
+        // Check if device belongs to current user
+        if (!device.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this device");
+        }
+
+        // Update fields from DTO
+        device.setName(dto.getName());
+        device.setServiceUuid(dto.getServiceUuid());
+        device.setReadNotifyCharacteristicUuid(dto.getReadNotifyCharacteristicUuid());
+        device.setWriteCharacteristicUuid(dto.getWriteCharacteristicUuid());
+
+        // Save updated device
+        Device updated = deviceRepository.save(device);
+
+        return mapToDto(updated);
+    }
+
 }

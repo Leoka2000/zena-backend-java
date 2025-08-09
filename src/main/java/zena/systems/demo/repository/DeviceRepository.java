@@ -5,6 +5,9 @@ import zena.systems.demo.model.Device;
 
 import java.util.List;
 
+
 public interface DeviceRepository extends JpaRepository<Device, Long> {
     List<Device> findByUserId(Long userId);
+
+
 }
