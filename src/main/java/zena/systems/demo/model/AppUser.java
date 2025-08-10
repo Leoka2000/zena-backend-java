@@ -16,7 +16,7 @@ import java.util.List;
 @Setter
 public class AppUser implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true, nullable = false)
     private String username;
@@ -31,19 +31,19 @@ public class AppUser implements UserDetails {
     private LocalDateTime verificationCodeExpiresAt;
     private boolean enabled;
 
-        // New field
+    // New field
     @Column(name = "has_created_first_device", nullable = false)
     private boolean hasCreatedFirstDevice = false;
 
-    //constructor for creating an unverified user
+    // constructor for creating an unverified user
     public AppUser(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
     }
-    
-    //default constructor
-    public AppUser(){
+
+    // default constructor
+    public AppUser() {
     }
 
     @Override
@@ -51,14 +51,12 @@ public class AppUser implements UserDetails {
         return List.of();
     }
 
-    //TODO: add proper boolean checks
+    // TODO: add proper boolean checks
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
-   
-  
     @Override
     public boolean isAccountNonLocked() {
         return true;

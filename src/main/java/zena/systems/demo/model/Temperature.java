@@ -25,4 +25,6 @@ public class Temperature {
     @CreationTimestamp
     @Column(updatable = false)
     private Instant createdAt;
+
+    
 }
