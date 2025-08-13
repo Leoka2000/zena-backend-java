@@ -43,6 +43,8 @@ public class UserController {
             }
 
             AppUser currentUser = (AppUser) authentication.getPrincipal();
+            
+
             AppUser updatedUser = userService.updateUser(
                     currentUser.getId(),
                     updateDto.getUsername(),

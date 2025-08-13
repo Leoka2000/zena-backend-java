@@ -1,26 +1,16 @@
 package zena.systems.demo.service;
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-import jakarta.transaction.Transactional;
 import zena.systems.demo.dto.DeviceRequestDto;
 import zena.systems.demo.dto.DeviceResponseDto;
 import zena.systems.demo.dto.DeviceUpdateRequestDto;
-import zena.systems.demo.model.Accelerometer;
-import zena.systems.demo.model.AppUser;
-import zena.systems.demo.model.Device;
-import zena.systems.demo.model.Temperature;
-import zena.systems.demo.model.Voltage;
-import zena.systems.demo.repository.AccelerometerRepository;
-import zena.systems.demo.repository.DeviceRepository;
-import zena.systems.demo.repository.TemperatureRepository;
-import zena.systems.demo.repository.UserRepository;
-import zena.systems.demo.repository.VoltageRepository;
+import zena.systems.demo.model.*;
+import zena.systems.demo.repository.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,15 +38,15 @@ public class DeviceService {
 
         // Create a new Temperature instance tied to device and user
         Temperature temp = new Temperature();
-        temp.setTemperature(0.0f); // default temperature value
-        temp.setTimestamp(System.currentTimeMillis() / 1000); // current epoch seconds
+        temp.setTemperature(0.0f);
+        temp.setTimestamp(System.currentTimeMillis() / 1000);
         temp.setDevice(saved);
         temp.setUser(currentUser);
         temperatureRepository.save(temp);
 
         // Create a new Accelerometer instance tied to device and user
         Accelerometer accel = new Accelerometer();
-        accel.setX(0.0f); // default placeholder values
+        accel.setX(0.0f);
         accel.setY(0.0f);
         accel.setZ(0.0f);
         accel.setTimestamp(System.currentTimeMillis() / 1000);
@@ -66,7 +56,7 @@ public class DeviceService {
 
         // Create a new Voltage instance tied to device and user
         Voltage voltage = new Voltage();
-        voltage.setVoltage(0.0f); // default voltage value
+        voltage.setVoltage(0.0f);
         voltage.setTimestamp(System.currentTimeMillis() / 1000);
         voltage.setDevice(saved);
         voltage.setUser(currentUser);
@@ -101,11 +91,9 @@ public class DeviceService {
 
     public DeviceResponseDto getDeviceById(Long id) {
         AppUser currentUser = getCurrentUser();
-
         Device device = deviceRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
 
-        // Check if the device belongs to the current user
         if (!device.getUser().getId().equals(currentUser.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this device");
         }
@@ -122,7 +110,6 @@ public class DeviceService {
     @Transactional
     public DeviceResponseDto updateDevice(Long id, DeviceUpdateRequestDto dto) {
         AppUser currentUser = getCurrentUser();
-
         Device device = deviceRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
 
@@ -130,16 +117,14 @@ public class DeviceService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this device");
         }
 
-        // Update fields from DTO
         device.setName(dto.getName());
         device.setServiceUuid(dto.getServiceUuid());
         device.setReadNotifyCharacteristicUuid(dto.getReadNotifyCharacteristicUuid());
         device.setWriteCharacteristicUuid(dto.getWriteCharacteristicUuid());
 
-        // Save updated device
         Device updated = deviceRepository.save(device);
-
         return mapToDto(updated);
     }
-
 }
+
+

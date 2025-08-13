@@ -2,10 +2,11 @@ package zena.systems.demo.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import zena.systems.demo.dto.DeviceRequestDto;
-import zena.systems.demo.dto.DeviceResponseDto;
-import zena.systems.demo.dto.DeviceUpdateRequestDto;
+import zena.systems.demo.dto.*;
+import zena.systems.demo.model.AppUser;
+import zena.systems.demo.service.ActiveDeviceService;
 import zena.systems.demo.service.DeviceService;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
 public class DeviceController {
 
     private final DeviceService deviceService;
+    private final ActiveDeviceService activeDeviceService;
 
     @PostMapping("/create")
     public ResponseEntity<DeviceResponseDto> createDevice(@RequestBody DeviceRequestDto dto) {
@@ -37,4 +39,18 @@ public class DeviceController {
         return ResponseEntity.ok(updatedDevice);
     }
 
+    @PostMapping("/select")
+    public ResponseEntity<ActiveDeviceResponseDto> selectActiveDevice(
+            @RequestParam Long deviceId,
+            @AuthenticationPrincipal AppUser user) {
+        ActiveDeviceResponseDto dto = activeDeviceService.setActiveDevice(user, deviceId);
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<ActiveDeviceResponseDto> getActiveDevice(
+            @AuthenticationPrincipal AppUser user) {
+        ActiveDeviceResponseDto dto = activeDeviceService.getActiveDevice(user);
+        return ResponseEntity.ok(dto);
+    }
 }
