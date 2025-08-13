@@ -8,4 +8,5 @@ import lombok.Setter;
 public class TemperatureRequestDto {
     private Float temperature;
     private Long timestamp;
+    private Long deviceId;
 }

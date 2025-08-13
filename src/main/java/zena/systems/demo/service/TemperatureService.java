@@ -1,13 +1,20 @@
 package zena.systems.demo.service;
 
-import zena.systems.demo.dto.TemperatureRequestDto;
-import zena.systems.demo.dto.TemperatureResponseDto;
-import zena.systems.demo.model.Temperature;
-import zena.systems.demo.repository.TemperatureRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import zena.systems.demo.dto.TemperatureRequestDto;
+import zena.systems.demo.dto.TemperatureResponseDto;
+import zena.systems.demo.model.AppUser;
+import zena.systems.demo.model.Device;
+import zena.systems.demo.model.Temperature;
+import zena.systems.demo.repository.DeviceRepository;
+import zena.systems.demo.repository.TemperatureRepository;
+import zena.systems.demo.repository.UserRepository;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -19,15 +26,39 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TemperatureService {
     private static final Logger logger = LoggerFactory.getLogger(TemperatureService.class);
+
     private final TemperatureRepository temperatureRepository;
+    private final DeviceRepository deviceRepository;
+    private final UserRepository userRepository;
 
     public void saveTemperature(TemperatureRequestDto requestDTO) {
+        AppUser currentUser = getCurrentUser();
+
+        // Find device
+        Device device = deviceRepository.findById(requestDTO.getDeviceId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
+
+        // Ensure the device belongs to the current user
+        if (!device.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this device");
+        }
+
+        // Create and save the temperature reading
         Temperature temperature = new Temperature();
         temperature.setTemperature(requestDTO.getTemperature());
         temperature.setTimestamp(requestDTO.getTimestamp());
-        
+        temperature.setDevice(device);
+        temperature.setUser(currentUser);
+
         temperatureRepository.save(temperature);
-        logger.info("Received Temperature Data: {}", requestDTO);
+
+        logger.info("Received Temperature Data for device {}: {}", requestDTO.getDeviceId(), requestDTO);
+    }
+
+    private AppUser getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     public List<TemperatureResponseDto> getTemperatureHistory(String range) {
@@ -42,7 +73,6 @@ public class TemperatureService {
 
     public List<TemperatureResponseDto> getAllTemperatureHistory() {
         List<Temperature> temperatures = temperatureRepository.findAllByOrderByTimestampAsc();
-
         return temperatures.stream()
             .map(this::convertToResponseDTO)
             .collect(Collectors.toList());
@@ -62,14 +92,13 @@ public class TemperatureService {
         TemperatureResponseDto dto = new TemperatureResponseDto();
         dto.setTemperature(temperature.getTemperature());
         dto.setTimestamp(temperature.getTimestamp());
-        
-        // Convert timestamp to ISO string
+
         Instant instant = Instant.ofEpochSecond(temperature.getTimestamp());
         String isoDate = DateTimeFormatter.ISO_INSTANT
                 .withZone(ZoneId.systemDefault())
                 .format(instant);
         dto.setDate(isoDate);
-        
+
         return dto;
     }
 }

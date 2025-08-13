@@ -11,10 +11,16 @@ import jakarta.transaction.Transactional;
 import zena.systems.demo.dto.DeviceRequestDto;
 import zena.systems.demo.dto.DeviceResponseDto;
 import zena.systems.demo.dto.DeviceUpdateRequestDto;
+import zena.systems.demo.model.Accelerometer;
 import zena.systems.demo.model.AppUser;
 import zena.systems.demo.model.Device;
+import zena.systems.demo.model.Temperature;
+import zena.systems.demo.model.Voltage;
+import zena.systems.demo.repository.AccelerometerRepository;
 import zena.systems.demo.repository.DeviceRepository;
+import zena.systems.demo.repository.TemperatureRepository;
 import zena.systems.demo.repository.UserRepository;
+import zena.systems.demo.repository.VoltageRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,7 +30,11 @@ import java.util.stream.Collectors;
 public class DeviceService {
     private final DeviceRepository deviceRepository;
     private final UserRepository userRepository;
+    private final TemperatureRepository temperatureRepository;
+    private final AccelerometerRepository accelerometerRepository;
+    private final VoltageRepository voltageRepository;
 
+    @Transactional
     public DeviceResponseDto createDevice(DeviceRequestDto dto) {
         AppUser currentUser = getCurrentUser();
         Device device = new Device();
@@ -35,6 +45,32 @@ public class DeviceService {
         device.setUser(currentUser);
 
         Device saved = deviceRepository.save(device);
+
+        // Create a new Temperature instance tied to device and user
+        Temperature temp = new Temperature();
+        temp.setTemperature(0.0f); // default temperature value
+        temp.setTimestamp(System.currentTimeMillis() / 1000); // current epoch seconds
+        temp.setDevice(saved);
+        temp.setUser(currentUser);
+        temperatureRepository.save(temp);
+
+        // Create a new Accelerometer instance tied to device and user
+        Accelerometer accel = new Accelerometer();
+        accel.setX(0.0f); // default placeholder values
+        accel.setY(0.0f);
+        accel.setZ(0.0f);
+        accel.setTimestamp(System.currentTimeMillis() / 1000);
+        accel.setDevice(saved);
+        accel.setUser(currentUser);
+        accelerometerRepository.save(accel);
+
+        // Create a new Voltage instance tied to device and user
+        Voltage voltage = new Voltage();
+        voltage.setVoltage(0.0f); // default voltage value
+        voltage.setTimestamp(System.currentTimeMillis() / 1000);
+        voltage.setDevice(saved);
+        voltage.setUser(currentUser);
+        voltageRepository.save(voltage);
 
         // Update user hasCreatedFirstDevice flag if needed
         if (!currentUser.isHasCreatedFirstDevice()) {
@@ -90,7 +126,6 @@ public class DeviceService {
         Device device = deviceRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
 
-       
         if (!device.getUser().getId().equals(currentUser.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this device");
         }
