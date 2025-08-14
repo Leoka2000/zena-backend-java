@@ -25,6 +25,18 @@ public class DeviceController {
         return ResponseEntity.ok(created);
     }
 
+    @PostMapping("/create-from-bluetooth")
+    public ResponseEntity<DeviceResponseDto> createDeviceFromBluetooth(
+            @RequestBody BluetoothDeviceRequestDto dto,
+            @AuthenticationPrincipal AppUser user) {
+        DeviceResponseDto created = deviceService.createDeviceFromBluetooth(
+                dto.getName(),
+                dto.getServiceUuid(),
+                dto.getNotifyCharacteristicUuid(),
+                dto.getWriteCharacteristicUuid());
+        return ResponseEntity.ok(created);
+    }
+
     @GetMapping("/list")
     public ResponseEntity<List<DeviceResponseDto>> listUserDevices() {
         List<DeviceResponseDto> devices = deviceService.getUserDevices();

@@ -27,48 +27,67 @@ public class DeviceService {
     @Transactional
     public DeviceResponseDto createDevice(DeviceRequestDto dto) {
         AppUser currentUser = getCurrentUser();
+        return createDeviceWithUser(dto, currentUser);
+    }
+
+    @Transactional
+    public DeviceResponseDto createDeviceFromBluetooth(String name, String serviceUuid,
+            String notifyCharUuid, String writeCharUuid) {
+        AppUser currentUser = getCurrentUser();
+        DeviceRequestDto dto = new DeviceRequestDto();
+        dto.setName(name);
+        dto.setServiceUuid(serviceUuid);
+        dto.setReadNotifyCharacteristicUuid(notifyCharUuid);
+        dto.setWriteCharacteristicUuid(writeCharUuid);
+
+        return createDeviceWithUser(dto, currentUser);
+    }
+
+    private DeviceResponseDto createDeviceWithUser(DeviceRequestDto dto, AppUser user) {
         Device device = new Device();
         device.setServiceUuid(dto.getServiceUuid());
         device.setReadNotifyCharacteristicUuid(dto.getReadNotifyCharacteristicUuid());
         device.setWriteCharacteristicUuid(dto.getWriteCharacteristicUuid());
         device.setName(dto.getName());
-        device.setUser(currentUser);
+        device.setUser(user);
 
         Device saved = deviceRepository.save(device);
 
-        // Create a new Temperature instance tied to device and user
+        // Create default sensor data
+        createDefaultSensorData(saved, user);
+
+        // Update user flag if needed
+        if (!user.isHasCreatedFirstDevice()) {
+            user.setHasCreatedFirstDevice(true);
+            userRepository.save(user);
+        }
+
+        return mapToDto(saved);
+    }
+
+    private void createDefaultSensorData(Device device, AppUser user) {
         Temperature temp = new Temperature();
         temp.setTemperature(0.0f);
         temp.setTimestamp(System.currentTimeMillis() / 1000);
-        temp.setDevice(saved);
-        temp.setUser(currentUser);
+        temp.setDevice(device);
+        temp.setUser(user);
         temperatureRepository.save(temp);
 
-        // Create a new Accelerometer instance tied to device and user
         Accelerometer accel = new Accelerometer();
         accel.setX(0.0f);
         accel.setY(0.0f);
         accel.setZ(0.0f);
         accel.setTimestamp(System.currentTimeMillis() / 1000);
-        accel.setDevice(saved);
-        accel.setUser(currentUser);
+        accel.setDevice(device);
+        accel.setUser(user);
         accelerometerRepository.save(accel);
 
-        // Create a new Voltage instance tied to device and user
         Voltage voltage = new Voltage();
         voltage.setVoltage(0.0f);
         voltage.setTimestamp(System.currentTimeMillis() / 1000);
-        voltage.setDevice(saved);
-        voltage.setUser(currentUser);
+        voltage.setDevice(device);
+        voltage.setUser(user);
         voltageRepository.save(voltage);
-
-        // Update user hasCreatedFirstDevice flag if needed
-        if (!currentUser.isHasCreatedFirstDevice()) {
-            currentUser.setHasCreatedFirstDevice(true);
-            userRepository.save(currentUser);
-        }
-
-        return mapToDto(saved);
     }
 
     public List<DeviceResponseDto> getUserDevices() {
@@ -126,5 +145,3 @@ public class DeviceService {
         return mapToDto(updated);
     }
 }
-
-
