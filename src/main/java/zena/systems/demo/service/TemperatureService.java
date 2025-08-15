@@ -61,21 +61,36 @@ public class TemperatureService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public List<TemperatureResponseDto> getTemperatureHistory(String range) {
+    public List<TemperatureResponseDto> getTemperatureHistory(String range, Long deviceId) {
         Long fromTimestamp = calculateFromTimestamp(range);
-        List<Temperature> temperatures = temperatureRepository
-            .findByTimestampGreaterThanEqualOrderByTimestampAsc(fromTimestamp);
+
+        List<Temperature> temperatures;
+
+        if (deviceId != null) {
+            if (range != null && !range.isEmpty()) {
+                temperatures = temperatureRepository
+                        .findByDevice_IdAndTimestampGreaterThanEqualOrderByTimestampAsc(deviceId, fromTimestamp);
+            } else {
+                temperatures = temperatureRepository.findByDevice_IdOrderByTimestampAsc(deviceId);
+            }
+        } else {
+            if (range != null && !range.isEmpty()) {
+                temperatures = temperatureRepository.findByTimestampGreaterThanEqualOrderByTimestampAsc(fromTimestamp);
+            } else {
+                temperatures = temperatureRepository.findAllByOrderByTimestampAsc();
+            }
+        }
 
         return temperatures.stream()
-            .map(this::convertToResponseDTO)
-            .collect(Collectors.toList());
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
     }
 
     public List<TemperatureResponseDto> getAllTemperatureHistory() {
         List<Temperature> temperatures = temperatureRepository.findAllByOrderByTimestampAsc();
         return temperatures.stream()
-            .map(this::convertToResponseDTO)
-            .collect(Collectors.toList());
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
     }
 
     private Long calculateFromTimestamp(String range) {

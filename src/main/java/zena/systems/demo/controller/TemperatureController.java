@@ -25,13 +25,10 @@ public class TemperatureController {
 
     @GetMapping("/history")
     public ResponseEntity<List<TemperatureResponseDto>> getTemperatureHistory(
-            @RequestParam(required = false) String range) {
+            @RequestParam(required = false) String range,
+            @RequestParam(required = false) Long deviceId) {
 
-        if (range == null || range.isEmpty()) {
-            return ResponseEntity.ok(temperatureService.getAllTemperatureHistory());
-        }
-
-        return ResponseEntity.ok(temperatureService.getTemperatureHistory(range));
+        return ResponseEntity.ok(temperatureService.getTemperatureHistory(range, deviceId));
     }
 
     @GetMapping("/debug")
