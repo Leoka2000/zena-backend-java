@@ -24,14 +24,9 @@ public class AccelerometerController {
 
     @GetMapping("/history")
     public ResponseEntity<List<AccelerometerResponseDto>> getAccelerometerHistory(
-            @RequestParam(required = false) String range) {
+            @RequestParam(required = false) String range,
+            @RequestParam(required = false) Long deviceId) {
         
-        if (range == null || range.isEmpty()) {
-            // Return all records if no range specified
-            return ResponseEntity.ok(accelerometerService.getAllAccelerometerHistory());
-        }
-        
-        // Otherwise return filtered records
-        return ResponseEntity.ok(accelerometerService.getAccelerometerHistory(range));
+        return ResponseEntity.ok(accelerometerService.getAccelerometerHistory(range, deviceId));
     }
 }

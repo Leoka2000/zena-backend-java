@@ -6,7 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AccelerometerResponseDto {
-    private Long timestamp;
     private Float x;
     private Float y;
     private Float z;

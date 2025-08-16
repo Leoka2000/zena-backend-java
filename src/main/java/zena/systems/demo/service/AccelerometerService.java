@@ -29,16 +29,13 @@ public class AccelerometerService {
     public void saveAccelerometerData(AccelerometerRequestDto requestDto) {
         AppUser currentUser = getCurrentUser();
 
-        // Find device
         Device device = deviceRepository.findById(requestDto.getDeviceId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
 
-        // Ensure ownership
         if (!device.getUser().getId().equals(currentUser.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this device");
         }
 
-        // Create new record
         Accelerometer accelerometer = new Accelerometer();
         accelerometer.setX(requestDto.getX());
         accelerometer.setY(requestDto.getY());
@@ -49,10 +46,25 @@ public class AccelerometerService {
         accelerometerRepository.save(accelerometer);
     }
 
-    public List<AccelerometerResponseDto> getAccelerometerHistory(String range) {
+    public List<AccelerometerResponseDto> getAccelerometerHistory(String range, Long deviceId) {
         Instant fromTimestamp = calculateFromTimestamp(range);
-        List<Accelerometer> accelerometers = accelerometerRepository
-                .findByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(fromTimestamp);
+
+        List<Accelerometer> accelerometers;
+
+        if (deviceId != null) {
+            if (range != null && !range.isEmpty()) {
+                accelerometers = accelerometerRepository
+                        .findByDevice_IdAndCreatedAtGreaterThanEqualOrderByCreatedAtAsc(deviceId, fromTimestamp);
+            } else {
+                accelerometers = accelerometerRepository.findByDevice_IdOrderByCreatedAtAsc(deviceId);
+            }
+        } else {
+            if (range != null && !range.isEmpty()) {
+                accelerometers = accelerometerRepository.findByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(fromTimestamp);
+            } else {
+                accelerometers = accelerometerRepository.findAllByOrderByCreatedAtAsc();
+            }
+        }
 
         return accelerometers.stream()
                 .map(this::convertToResponseDTO)
@@ -82,12 +94,9 @@ public class AccelerometerService {
         dto.setY(accelerometer.getY());
         dto.setZ(accelerometer.getZ());
 
-        Instant createdAt = accelerometer.getCreatedAt();
-        dto.setTimestamp(createdAt.getEpochSecond());
-
         String isoDate = DateTimeFormatter.ISO_INSTANT
                 .withZone(ZoneId.systemDefault())
-                .format(createdAt);
+                .format(accelerometer.getCreatedAt());
         dto.setDate(isoDate);
 
         return dto;

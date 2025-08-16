@@ -25,13 +25,10 @@ public class VoltageController {
 
     @GetMapping("/history")
     public ResponseEntity<List<VoltageResponseDto>> getVoltageHistory(
-            @RequestParam(required = false) String range) {
+            @RequestParam(required = false) String range,
+            @RequestParam(required = false) Long deviceId) {
 
-        if (range == null || range.isEmpty()) {
-            return ResponseEntity.ok(voltageService.getAllVoltageHistory());
-        }
-
-        return ResponseEntity.ok(voltageService.getVoltageHistory(range));
+        return ResponseEntity.ok(voltageService.getVoltageHistory(range, deviceId));
     }
 
     @GetMapping("/debug")

@@ -7,6 +7,5 @@ import lombok.Setter;
 @Setter
 public class VoltageResponseDto {
     private Float voltage;
-    private Long timestamp;
     private String date; // ISO formatted
 }

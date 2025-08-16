@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-
 public class VoltageService {
     private static final Logger logger = LoggerFactory.getLogger(VoltageService.class);
 
@@ -35,16 +34,13 @@ public class VoltageService {
     public void saveVoltage(VoltageRequestDto requestDTO) {
         AppUser currentUser = getCurrentUser();
 
-        // Find device
         Device device = deviceRepository.findById(requestDTO.getDeviceId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
 
-        // Ensure the device belongs to this user
         if (!device.getUser().getId().equals(currentUser.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this device");
         }
 
-        // Create and save the voltage record
         Voltage voltage = new Voltage();
         voltage.setVoltage(requestDTO.getVoltage());
         voltage.setDevice(device);
@@ -55,14 +51,25 @@ public class VoltageService {
         logger.info("Received Voltage Data for device {}: {}", requestDTO.getDeviceId(), requestDTO);
     }
 
-    public List<VoltageResponseDto> getVoltageHistory(String range) {
-        Instant fromTimestamp = calculateFromTimestamp(range);
-        logger.info("Fetching voltage history from createdAt: {}", fromTimestamp);
+    public List<VoltageResponseDto> getVoltageHistory(String range, Long deviceId) {
+        Instant fromCreatedAt = calculateFromTimestamp(range);
 
-        List<Voltage> voltages = voltageRepository
-                .findByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(fromTimestamp);
+        List<Voltage> voltages;
 
-        logger.info("Found {} voltage records", voltages.size());
+        if (deviceId != null) {
+            if (range != null && !range.isEmpty()) {
+                voltages = voltageRepository
+                        .findByDevice_IdAndCreatedAtGreaterThanEqualOrderByCreatedAtAsc(deviceId, fromCreatedAt);
+            } else {
+                voltages = voltageRepository.findByDevice_IdOrderByCreatedAtAsc(deviceId);
+            }
+        } else {
+            if (range != null && !range.isEmpty()) {
+                voltages = voltageRepository.findByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(fromCreatedAt);
+            } else {
+                voltages = voltageRepository.findAllByOrderByCreatedAtAsc();
+            }
+        }
 
         return voltages.stream()
                 .map(this::convertToResponseDTO)
@@ -90,12 +97,9 @@ public class VoltageService {
         VoltageResponseDto dto = new VoltageResponseDto();
         dto.setVoltage(voltage.getVoltage());
 
-        Instant createdAt = voltage.getCreatedAt();
-        dto.setTimestamp(createdAt.getEpochSecond());
-
         String isoDate = DateTimeFormatter.ISO_INSTANT
                 .withZone(ZoneId.systemDefault())
-                .format(createdAt);
+                .format(voltage.getCreatedAt());
         dto.setDate(isoDate);
 
         return dto;

@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface VoltageRepository extends JpaRepository<Voltage, Long> {
     List<Voltage> findAllByOrderByCreatedAtAsc();
-
     List<Voltage> findByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(Instant fromTimestamp);
+    List<Voltage> findByDevice_IdAndCreatedAtGreaterThanEqualOrderByCreatedAtAsc(Long deviceId, Instant fromCreatedAt);
+    List<Voltage> findByDevice_IdOrderByCreatedAtAsc(Long deviceId);
 }

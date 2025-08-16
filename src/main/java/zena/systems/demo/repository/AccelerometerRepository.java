@@ -8,6 +8,8 @@ import java.util.List;
 
 @Repository
 public interface AccelerometerRepository extends JpaRepository<Accelerometer, Long> {
-    List<Accelerometer> findByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(Instant fromTimestamp);
     List<Accelerometer> findAllByOrderByCreatedAtAsc();
+    List<Accelerometer> findByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(Instant fromTimestamp);
+    List<Accelerometer> findByDevice_IdAndCreatedAtGreaterThanEqualOrderByCreatedAtAsc(Long deviceId, Instant fromCreatedAt);
+    List<Accelerometer> findByDevice_IdOrderByCreatedAtAsc(Long deviceId);
 }
