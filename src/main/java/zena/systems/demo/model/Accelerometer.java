@@ -25,7 +25,7 @@ public class Accelerometer {
     @Column(nullable = false)
     private Float z;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Long timestamp;
 
     @CreationTimestamp

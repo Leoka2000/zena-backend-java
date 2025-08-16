@@ -19,7 +19,7 @@ public class Voltage {
     @Column(nullable = false)
     private Float voltage;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Long timestamp;
 
     @CreationTimestamp

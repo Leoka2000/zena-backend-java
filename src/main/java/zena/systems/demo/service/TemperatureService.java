@@ -34,19 +34,17 @@ public class TemperatureService {
     public void saveTemperature(TemperatureRequestDto requestDTO) {
         AppUser currentUser = getCurrentUser();
 
-        // Find device
         Device device = deviceRepository.findById(requestDTO.getDeviceId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
 
-        // Ensure the device belongs to the current user
         if (!device.getUser().getId().equals(currentUser.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this device");
         }
 
-        // Create and save the temperature reading
         Temperature temperature = new Temperature();
         temperature.setTemperature(requestDTO.getTemperature());
-        temperature.setTimestamp(requestDTO.getTimestamp());
+        // We no longer manually set timestamp; createdAt will be populated
+        // automatically
         temperature.setDevice(device);
         temperature.setUser(currentUser);
 
@@ -62,22 +60,22 @@ public class TemperatureService {
     }
 
     public List<TemperatureResponseDto> getTemperatureHistory(String range, Long deviceId) {
-        Long fromTimestamp = calculateFromTimestamp(range);
+        Instant fromCreatedAt = calculateFromInstant(range);
 
         List<Temperature> temperatures;
 
         if (deviceId != null) {
             if (range != null && !range.isEmpty()) {
                 temperatures = temperatureRepository
-                        .findByDevice_IdAndTimestampGreaterThanEqualOrderByTimestampAsc(deviceId, fromTimestamp);
+                        .findByDevice_IdAndCreatedAtGreaterThanEqualOrderByCreatedAtAsc(deviceId, fromCreatedAt);
             } else {
-                temperatures = temperatureRepository.findByDevice_IdOrderByTimestampAsc(deviceId);
+                temperatures = temperatureRepository.findByDevice_IdOrderByCreatedAtAsc(deviceId);
             }
         } else {
             if (range != null && !range.isEmpty()) {
-                temperatures = temperatureRepository.findByTimestampGreaterThanEqualOrderByTimestampAsc(fromTimestamp);
+                temperatures = temperatureRepository.findByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(fromCreatedAt);
             } else {
-                temperatures = temperatureRepository.findAllByOrderByTimestampAsc();
+                temperatures = temperatureRepository.findAllByOrderByCreatedAtAsc();
             }
         }
 
@@ -87,31 +85,33 @@ public class TemperatureService {
     }
 
     public List<TemperatureResponseDto> getAllTemperatureHistory() {
-        List<Temperature> temperatures = temperatureRepository.findAllByOrderByTimestampAsc();
+        List<Temperature> temperatures = temperatureRepository.findAllByOrderByCreatedAtAsc();
         return temperatures.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    private Long calculateFromTimestamp(String range) {
+    private Instant calculateFromInstant(String range) {
         Instant now = Instant.now();
         return switch (range) {
-            case "week" -> now.minusSeconds(7 * 24 * 60 * 60).getEpochSecond();
-            case "month" -> now.minusSeconds(30L * 24 * 60 * 60).getEpochSecond();
-            case "3months" -> now.minusSeconds(90L * 24 * 60 * 60).getEpochSecond();
-            default -> now.minusSeconds(24 * 60 * 60).getEpochSecond(); // default to day
+            case "week" -> now.minusSeconds(7 * 24 * 60 * 60);
+            case "month" -> now.minusSeconds(30L * 24 * 60 * 60);
+            case "3months" -> now.minusSeconds(90L * 24 * 60 * 60);
+            default -> now.minusSeconds(24 * 60 * 60);
         };
     }
 
     private TemperatureResponseDto convertToResponseDTO(Temperature temperature) {
         TemperatureResponseDto dto = new TemperatureResponseDto();
         dto.setTemperature(temperature.getTemperature());
-        dto.setTimestamp(temperature.getTimestamp());
 
-        Instant instant = Instant.ofEpochSecond(temperature.getTimestamp());
+        // Use createdAt instead of timestamp
+        long epochSeconds = temperature.getCreatedAt().getEpochSecond();
+        dto.setTimestamp(epochSeconds);
+
         String isoDate = DateTimeFormatter.ISO_INSTANT
                 .withZone(ZoneId.systemDefault())
-                .format(instant);
+                .format(temperature.getCreatedAt());
         dto.setDate(isoDate);
 
         return dto;

@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+
 public class VoltageService {
     private static final Logger logger = LoggerFactory.getLogger(VoltageService.class);
 
@@ -46,29 +47,20 @@ public class VoltageService {
         // Create and save the voltage record
         Voltage voltage = new Voltage();
         voltage.setVoltage(requestDTO.getVoltage());
-
-        // Convert milliseconds to seconds if needed
-        Long originalTimestamp = requestDTO.getTimestamp();
-        Long correctedTimestamp = (originalTimestamp != null && originalTimestamp > 1_000_000_000_000L)
-                ? originalTimestamp / 1000
-                : originalTimestamp;
-
-        voltage.setTimestamp(correctedTimestamp);
         voltage.setDevice(device);
         voltage.setUser(currentUser);
 
         voltageRepository.save(voltage);
 
-        logger.info("Received Voltage Data for device {}: {}, corrected timestamp: {}",
-                requestDTO.getDeviceId(), requestDTO, correctedTimestamp);
+        logger.info("Received Voltage Data for device {}: {}", requestDTO.getDeviceId(), requestDTO);
     }
 
     public List<VoltageResponseDto> getVoltageHistory(String range) {
-        Long fromTimestamp = calculateFromTimestamp(range);
-        logger.info("Fetching voltage history from timestamp: {}", fromTimestamp);
+        Instant fromTimestamp = calculateFromTimestamp(range);
+        logger.info("Fetching voltage history from createdAt: {}", fromTimestamp);
 
         List<Voltage> voltages = voltageRepository
-                .findByTimestampGreaterThanEqualOrderByTimestampAsc(fromTimestamp);
+                .findByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(fromTimestamp);
 
         logger.info("Found {} voltage records", voltages.size());
 
@@ -78,31 +70,32 @@ public class VoltageService {
     }
 
     public List<VoltageResponseDto> getAllVoltageHistory() {
-        List<Voltage> voltages = voltageRepository.findAllByOrderByTimestampAsc();
+        List<Voltage> voltages = voltageRepository.findAllByOrderByCreatedAtAsc();
         return voltages.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    private Long calculateFromTimestamp(String range) {
+    private Instant calculateFromTimestamp(String range) {
         Instant now = Instant.now();
         return switch (range) {
-            case "week" -> now.minusSeconds(7 * 24 * 60 * 60).getEpochSecond();
-            case "month" -> now.minusSeconds(30L * 24 * 60 * 60).getEpochSecond();
-            case "3months" -> now.minusSeconds(90L * 24 * 60 * 60).getEpochSecond();
-            default -> now.minusSeconds(24 * 60 * 60).getEpochSecond();
+            case "week" -> now.minusSeconds(7 * 24 * 60 * 60);
+            case "month" -> now.minusSeconds(30L * 24 * 60 * 60);
+            case "3months" -> now.minusSeconds(90L * 24 * 60 * 60);
+            default -> now.minusSeconds(24 * 60 * 60);
         };
     }
 
     private VoltageResponseDto convertToResponseDTO(Voltage voltage) {
         VoltageResponseDto dto = new VoltageResponseDto();
         dto.setVoltage(voltage.getVoltage());
-        dto.setTimestamp(voltage.getTimestamp());
 
-        Instant instant = Instant.ofEpochSecond(voltage.getTimestamp());
+        Instant createdAt = voltage.getCreatedAt();
+        dto.setTimestamp(createdAt.getEpochSecond());
+
         String isoDate = DateTimeFormatter.ISO_INSTANT
                 .withZone(ZoneId.systemDefault())
-                .format(instant);
+                .format(createdAt);
         dto.setDate(isoDate);
 
         return dto;
