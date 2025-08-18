@@ -65,4 +65,11 @@ public class DeviceController {
         ActiveDeviceResponseDto dto = activeDeviceService.getActiveDevice(user);
         return ResponseEntity.ok(dto);
     }
+
+    @DeleteMapping("/list/{id}")
+    public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
+        deviceService.deleteDevice(id);
+        return ResponseEntity.noContent().build(); // 204 No Content
+    }
+
 }

@@ -17,4 +17,6 @@ public interface TemperatureRepository extends JpaRepository<Temperature, Long> 
             Instant fromCreatedAt);
 
     List<Temperature> findByDevice_IdOrderByCreatedAtAsc(Long deviceId);
+
+ 
 }

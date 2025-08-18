@@ -46,7 +46,7 @@ public class TemperatureService {
         // We no longer manually set timestamp; createdAt will be populated
         // automatically
         temperature.setDevice(device);
-        temperature.setUser(currentUser);
+
 
         temperatureRepository.save(temperature);
 

@@ -70,7 +70,7 @@ public class DeviceService {
         temp.setTemperature(0.0f);
         temp.setTimestamp(System.currentTimeMillis() / 1000);
         temp.setDevice(device);
-        temp.setUser(user);
+    
         temperatureRepository.save(temp);
 
         Accelerometer accel = new Accelerometer();
@@ -79,14 +79,14 @@ public class DeviceService {
         accel.setZ(0.0f);
         accel.setTimestamp(System.currentTimeMillis() / 1000);
         accel.setDevice(device);
-        accel.setUser(user);
+    
         accelerometerRepository.save(accel);
 
         Voltage voltage = new Voltage();
         voltage.setVoltage(0.0f);
         voltage.setTimestamp(System.currentTimeMillis() / 1000);
         voltage.setDevice(device);
-        voltage.setUser(user);
+      
         voltageRepository.save(voltage);
     }
 
@@ -144,4 +144,25 @@ public class DeviceService {
         Device updated = deviceRepository.save(device);
         return mapToDto(updated);
     }
+
+    @Transactional
+    public void deleteDevice(Long id) {
+        AppUser currentUser = getCurrentUser();
+        Device device = deviceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
+
+        // Ensure the device belongs to the current user
+        if (!device.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this device");
+        }
+
+        // Delete related sensor data first
+        temperatureRepository.deleteAll(temperatureRepository.findByDevice_IdOrderByCreatedAtAsc(id));
+        accelerometerRepository.deleteAll(accelerometerRepository.findByDevice_IdOrderByCreatedAtAsc(id));
+        voltageRepository.deleteAll(voltageRepository.findByDevice_IdOrderByCreatedAtAsc(id));
+
+        // Delete the device itself
+        deviceRepository.delete(device);
+    }
+
 }

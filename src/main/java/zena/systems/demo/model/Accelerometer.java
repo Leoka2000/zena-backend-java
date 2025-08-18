@@ -36,7 +36,5 @@ public class Accelerometer {
     @JoinColumn(name = "device_id", nullable = false)
     private Device device;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private AppUser user;
+   
 }

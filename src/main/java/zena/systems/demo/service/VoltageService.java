@@ -44,7 +44,7 @@ public class VoltageService {
         Voltage voltage = new Voltage();
         voltage.setVoltage(requestDTO.getVoltage());
         voltage.setDevice(device);
-        voltage.setUser(currentUser);
+   
 
         voltageRepository.save(voltage);
 

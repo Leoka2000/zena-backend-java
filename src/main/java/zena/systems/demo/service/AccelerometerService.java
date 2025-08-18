@@ -41,7 +41,6 @@ public class AccelerometerService {
         accelerometer.setY(requestDto.getY());
         accelerometer.setZ(requestDto.getZ());
         accelerometer.setDevice(device);
-        accelerometer.setUser(currentUser);
 
         accelerometerRepository.save(accelerometer);
     }
