@@ -1,12 +1,14 @@
 package zena.systems.demo.model;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "active_devices", 
-       uniqueConstraints = @UniqueConstraint(columnNames = {"user_id"}))
+@Table(name = "active_devices", uniqueConstraints = @UniqueConstraint(columnNames = { "user_id" }))
 @Getter
 @Setter
 public class ActiveDevice {
@@ -20,5 +22,6 @@ public class ActiveDevice {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "device_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Device device;
 }
