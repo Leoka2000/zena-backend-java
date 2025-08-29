@@ -2,9 +2,11 @@ package zena.systems.demo.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import zena.systems.demo.dto.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import zena.systems.demo.dto.ActiveDeviceResponseDto;
+import zena.systems.demo.dto.DeviceRequestDto;
+import zena.systems.demo.dto.DeviceResponseDto;
 import zena.systems.demo.model.AppUser;
 import zena.systems.demo.service.ActiveDeviceService;
 import zena.systems.demo.service.DeviceService;
@@ -25,30 +27,27 @@ public class DeviceController {
         return ResponseEntity.ok(created);
     }
 
-    @PostMapping("/create-from-bluetooth")
-    public ResponseEntity<DeviceResponseDto> createDeviceFromBluetooth(
-            @RequestBody BluetoothDeviceRequestDto dto,
-            @AuthenticationPrincipal AppUser user) {
-        DeviceResponseDto created = deviceService.createDeviceFromBluetooth(
-                dto.getName(),
-                dto.getServiceUuid(),
-                dto.getNotifyCharacteristicUuid(),
-                dto.getWriteCharacteristicUuid());
-        return ResponseEntity.ok(created);
-    }
-
     @GetMapping("/list")
     public ResponseEntity<List<DeviceResponseDto>> listUserDevices() {
-        List<DeviceResponseDto> devices = deviceService.getUserDevices();
-        return ResponseEntity.ok(devices);
+        return ResponseEntity.ok(deviceService.getUserDevices());
     }
 
-    @PatchMapping("/list/{id}")
+    @GetMapping("/{id}")
+    public ResponseEntity<DeviceResponseDto> getDevice(@PathVariable Long id) {
+        return ResponseEntity.ok(deviceService.getDeviceById(id));
+    }
+
+    @PatchMapping("/{id}")
     public ResponseEntity<DeviceResponseDto> updateDevice(
             @PathVariable Long id,
-            @RequestBody DeviceUpdateRequestDto updateDto) {
-        DeviceResponseDto updatedDevice = deviceService.updateDevice(id, updateDto);
-        return ResponseEntity.ok(updatedDevice);
+            @RequestBody DeviceRequestDto dto) {
+        return ResponseEntity.ok(deviceService.updateDevice(id, dto));
+    }
+
+    @DeleteMapping("/list/{id}")
+    public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
+        deviceService.deleteDevice(id);
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 
     @PostMapping("/select")
@@ -64,12 +63,6 @@ public class DeviceController {
             @AuthenticationPrincipal AppUser user) {
         ActiveDeviceResponseDto dto = activeDeviceService.getActiveDevice(user);
         return ResponseEntity.ok(dto);
-    }
-
-    @DeleteMapping("/list/{id}")
-    public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
-        deviceService.deleteDevice(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
     }
 
 }

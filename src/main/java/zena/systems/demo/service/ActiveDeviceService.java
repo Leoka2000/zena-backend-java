@@ -56,12 +56,14 @@ public class ActiveDeviceService {
         ActiveDeviceResponseDto dto = new ActiveDeviceResponseDto();
         dto.setDeviceId(device.getId());
         dto.setDeviceName(device.getName());
+        dto.setUserId(device.getUser().getId());
         dto.setServiceUuid(device.getServiceUuid());
-        dto.setReadNotifyCharacteristicUuid(device.getReadNotifyCharacteristicUuid());
-        dto.setWriteCharacteristicUuid(device.getWriteCharacteristicUuid());
-        dto.setUserId(device.getUser().getId()); 
+        dto.setMeasurementCharUuid(device.getMeasurementCharUuid());
+        dto.setLogReadCharUuid(device.getLogReadCharUuid());
+        dto.setSetTimeCharUuid(device.getSetTimeCharUuid());
+        dto.setLedControlCharUuid(device.getLedControlCharUuid());
+        dto.setSleepControlCharUuid(device.getSleepControlCharUuid());
+        dto.setAlarmCharUuid(device.getAlarmCharUuid());
         return dto;
     }
-
-    
 }

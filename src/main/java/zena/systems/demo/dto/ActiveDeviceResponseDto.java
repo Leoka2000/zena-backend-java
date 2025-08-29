@@ -8,8 +8,12 @@ import lombok.Setter;
 public class ActiveDeviceResponseDto {
     private Long deviceId;
     private String deviceName;
+    private Long userId;
     private String serviceUuid;
-    private String readNotifyCharacteristicUuid;
-    private String writeCharacteristicUuid;
-    private Long userId; // Optional, if you want to show who owns the device
+    private String measurementCharUuid;
+    private String logReadCharUuid;
+    private String setTimeCharUuid;
+    private String ledControlCharUuid;
+    private String sleepControlCharUuid;
+    private String alarmCharUuid;
 }
