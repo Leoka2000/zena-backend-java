@@ -16,4 +16,5 @@ public class ActiveDeviceResponseDto {
     private String ledControlCharUuid;
     private String sleepControlCharUuid;
     private String alarmCharUuid;
+    private boolean isRegisteredDevice;
 }

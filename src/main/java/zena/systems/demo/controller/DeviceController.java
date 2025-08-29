@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import zena.systems.demo.dto.ActiveDeviceResponseDto;
 import zena.systems.demo.dto.DeviceRequestDto;
 import zena.systems.demo.dto.DeviceResponseDto;
+import zena.systems.demo.dto.RegisterDeviceDto;
 import zena.systems.demo.model.AppUser;
 import zena.systems.demo.service.ActiveDeviceService;
 import zena.systems.demo.service.DeviceService;
@@ -64,5 +65,13 @@ public class DeviceController {
         ActiveDeviceResponseDto dto = activeDeviceService.getActiveDevice(user);
         return ResponseEntity.ok(dto);
     }
+    @PatchMapping("/register")
+public ResponseEntity<DeviceResponseDto> registerActiveDevice(
+        @AuthenticationPrincipal AppUser user,
+        @RequestBody RegisterDeviceDto dto) {
+
+    DeviceResponseDto updatedDevice = deviceService.registerActiveDevice(user, dto);
+    return ResponseEntity.ok(updatedDevice);
+}
 
 }

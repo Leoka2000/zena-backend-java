@@ -27,14 +27,11 @@ public class ActiveDeviceService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this device");
         }
 
-        // Find existing active device if it exists
         ActiveDevice activeDevice = activeDeviceRepository.findByUser(user);
 
         if (activeDevice != null) {
-            // Update existing record
             activeDevice.setDevice(device);
         } else {
-            // Create new record
             activeDevice = new ActiveDevice();
             activeDevice.setUser(user);
             activeDevice.setDevice(device);
@@ -52,6 +49,11 @@ public class ActiveDeviceService {
         return mapToActiveDeviceDto(activeDevice.getDevice());
     }
 
+    // Expose ActiveDevice entity for registering
+    public ActiveDevice getActiveDeviceEntity(AppUser user) {
+        return activeDeviceRepository.findByUser(user);
+    }
+
     private ActiveDeviceResponseDto mapToActiveDeviceDto(Device device) {
         ActiveDeviceResponseDto dto = new ActiveDeviceResponseDto();
         dto.setDeviceId(device.getId());
@@ -64,6 +66,7 @@ public class ActiveDeviceService {
         dto.setLedControlCharUuid(device.getLedControlCharUuid());
         dto.setSleepControlCharUuid(device.getSleepControlCharUuid());
         dto.setAlarmCharUuid(device.getAlarmCharUuid());
+        dto.setRegisteredDevice(device.isRegisteredDevice()); // populate field
         return dto;
     }
 }

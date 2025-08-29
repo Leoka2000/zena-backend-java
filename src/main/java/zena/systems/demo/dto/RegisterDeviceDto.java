@@ -3,13 +3,10 @@ package zena.systems.demo.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
-
 @Getter
 @Setter
-public class DeviceResponseDto {
-    private Long id;
-    private String name;
+public class RegisterDeviceDto {
+    
     private String serviceUuid;
     private String measurementCharUuid;
     private String logReadCharUuid;
@@ -17,7 +14,4 @@ public class DeviceResponseDto {
     private String ledControlCharUuid;
     private String sleepControlCharUuid;
     private String alarmCharUuid;
-    private boolean isRegisteredDevice;
-    private Instant createdAt;
-
 }

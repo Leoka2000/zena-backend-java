@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import zena.systems.demo.dto.DeviceRequestDto;
 import zena.systems.demo.dto.DeviceResponseDto;
+import zena.systems.demo.dto.RegisterDeviceDto;
+import zena.systems.demo.model.ActiveDevice;
 import zena.systems.demo.model.AppUser;
 import zena.systems.demo.model.Device;
 import zena.systems.demo.repository.DeviceRepository;
@@ -22,27 +24,17 @@ public class DeviceService {
 
     private final DeviceRepository deviceRepository;
     private final UserRepository userRepository;
+    private final ActiveDeviceService activeDeviceService;
 
     @Transactional
     public DeviceResponseDto createDevice(DeviceRequestDto dto) {
         AppUser currentUser = getCurrentUser();
-        Device device = mapDtoToDevice(dto, currentUser);
-        Device saved = deviceRepository.save(device);
-        return mapToDto(saved);
-    }
-
-    private Device mapDtoToDevice(DeviceRequestDto dto, AppUser user) {
         Device device = new Device();
         device.setName(dto.getName());
-        device.setServiceUuid(dto.getServiceUuid());
-        device.setMeasurementCharUuid(dto.getMeasurementCharUuid());
-        device.setLogReadCharUuid(dto.getLogReadCharUuid());
-        device.setSetTimeCharUuid(dto.getSetTimeCharUuid());
-        device.setLedControlCharUuid(dto.getLedControlCharUuid());
-        device.setSleepControlCharUuid(dto.getSleepControlCharUuid());
-        device.setAlarmCharUuid(dto.getAlarmCharUuid());
-        device.setUser(user);
-        return device;
+        device.setRegisteredDevice(false); // initial state
+        device.setUser(currentUser);
+        Device saved = deviceRepository.save(device);
+        return mapToDto(saved);
     }
 
     public List<DeviceResponseDto> getUserDevices() {
@@ -74,7 +66,6 @@ public class DeviceService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
         }
 
-        device.setName(dto.getName());
         device.setServiceUuid(dto.getServiceUuid());
         device.setMeasurementCharUuid(dto.getMeasurementCharUuid());
         device.setLogReadCharUuid(dto.getLogReadCharUuid());
@@ -100,6 +91,32 @@ public class DeviceService {
         deviceRepository.delete(device);
     }
 
+    @Transactional
+    public DeviceResponseDto registerActiveDevice(AppUser user, RegisterDeviceDto dto) {
+        ActiveDevice activeDevice = activeDeviceService.getActiveDeviceEntity(user);
+
+        if (activeDevice == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No active device to register");
+        }
+
+        Device device = activeDevice.getDevice();
+
+        // Patch UUID fields
+        device.setServiceUuid(dto.getServiceUuid());
+        device.setMeasurementCharUuid(dto.getMeasurementCharUuid());
+        device.setLogReadCharUuid(dto.getLogReadCharUuid());
+        device.setSetTimeCharUuid(dto.getSetTimeCharUuid());
+        device.setLedControlCharUuid(dto.getLedControlCharUuid());
+        device.setSleepControlCharUuid(dto.getSleepControlCharUuid());
+        device.setAlarmCharUuid(dto.getAlarmCharUuid());
+
+        // **Mark device as registered**
+        device.setRegisteredDevice(true);
+
+        deviceRepository.save(device);
+        return mapToDto(device); // mapToDto includes isRegisteredDevice
+    }
+
     private DeviceResponseDto mapToDto(Device device) {
         DeviceResponseDto dto = new DeviceResponseDto();
         dto.setId(device.getId());
@@ -111,6 +128,7 @@ public class DeviceService {
         dto.setLedControlCharUuid(device.getLedControlCharUuid());
         dto.setSleepControlCharUuid(device.getSleepControlCharUuid());
         dto.setAlarmCharUuid(device.getAlarmCharUuid());
+        dto.setRegisteredDevice(device.isRegisteredDevice());
         dto.setCreatedAt(device.getCreatedAt());
         return dto;
     }
