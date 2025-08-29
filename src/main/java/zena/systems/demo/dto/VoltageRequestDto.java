@@ -7,5 +7,6 @@ import lombok.Setter;
 @Setter
 public class VoltageRequestDto {
     private Float voltage;
+    private Long timestamp;
     private Long deviceId;
 }

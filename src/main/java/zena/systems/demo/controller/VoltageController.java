@@ -27,7 +27,6 @@ public class VoltageController {
     public ResponseEntity<List<VoltageResponseDto>> getVoltageHistory(
             @RequestParam(required = false) String range,
             @RequestParam(required = false) Long deviceId) {
-
         return ResponseEntity.ok(voltageService.getVoltageHistory(range, deviceId));
     }
 

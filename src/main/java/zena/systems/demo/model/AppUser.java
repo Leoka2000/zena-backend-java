@@ -16,7 +16,7 @@ import java.util.List;
 @Setter
 public class AppUser implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Column(unique = true, nullable = false)
     private String username;

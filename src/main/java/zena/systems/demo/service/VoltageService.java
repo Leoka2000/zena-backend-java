@@ -17,8 +17,6 @@ import zena.systems.demo.repository.UserRepository;
 import zena.systems.demo.repository.VoltageRepository;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,8 +41,8 @@ public class VoltageService {
 
         Voltage voltage = new Voltage();
         voltage.setVoltage(requestDTO.getVoltage());
+        voltage.setTimestamp(requestDTO.getTimestamp()); // ✅ now storing BLE timestamp
         voltage.setDevice(device);
-   
 
         voltageRepository.save(voltage);
 
@@ -52,22 +50,22 @@ public class VoltageService {
     }
 
     public List<VoltageResponseDto> getVoltageHistory(String range, Long deviceId) {
-        Instant fromCreatedAt = calculateFromTimestamp(range);
+        Long fromTimestamp = calculateFromTimestamp(range);
 
         List<Voltage> voltages;
 
         if (deviceId != null) {
             if (range != null && !range.isEmpty()) {
                 voltages = voltageRepository
-                        .findByDevice_IdAndCreatedAtGreaterThanEqualOrderByCreatedAtAsc(deviceId, fromCreatedAt);
+                        .findByDevice_IdAndTimestampGreaterThanEqualOrderByTimestampAsc(deviceId, fromTimestamp);
             } else {
-                voltages = voltageRepository.findByDevice_IdOrderByCreatedAtAsc(deviceId);
+                voltages = voltageRepository.findByDevice_IdOrderByTimestampAsc(deviceId);
             }
         } else {
             if (range != null && !range.isEmpty()) {
-                voltages = voltageRepository.findByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(fromCreatedAt);
+                voltages = voltageRepository.findByTimestampGreaterThanEqualOrderByTimestampAsc(fromTimestamp);
             } else {
-                voltages = voltageRepository.findAllByOrderByCreatedAtAsc();
+                voltages = voltageRepository.findAllByOrderByTimestampAsc();
             }
         }
 
@@ -77,31 +75,26 @@ public class VoltageService {
     }
 
     public List<VoltageResponseDto> getAllVoltageHistory() {
-        List<Voltage> voltages = voltageRepository.findAllByOrderByCreatedAtAsc();
+        List<Voltage> voltages = voltageRepository.findAllByOrderByTimestampAsc();
         return voltages.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    private Instant calculateFromTimestamp(String range) {
-        Instant now = Instant.now();
+    private Long calculateFromTimestamp(String range) {
+        long now = Instant.now().getEpochSecond();
         return switch (range) {
-            case "week" -> now.minusSeconds(7 * 24 * 60 * 60);
-            case "month" -> now.minusSeconds(30L * 24 * 60 * 60);
-            case "3months" -> now.minusSeconds(90L * 24 * 60 * 60);
-            default -> now.minusSeconds(24 * 60 * 60);
+            case "week" -> now - (7L * 24 * 60 * 60);
+            case "month" -> now - (30L * 24 * 60 * 60);
+            case "3months" -> now - (90L * 24 * 60 * 60);
+            default -> now - (24 * 60 * 60);
         };
     }
 
     private VoltageResponseDto convertToResponseDTO(Voltage voltage) {
         VoltageResponseDto dto = new VoltageResponseDto();
         dto.setVoltage(voltage.getVoltage());
-
-        String isoDate = DateTimeFormatter.ISO_INSTANT
-                .withZone(ZoneId.systemDefault())
-                .format(voltage.getCreatedAt());
-        dto.setDate(isoDate);
-
+        dto.setTimestamp(voltage.getTimestamp().toString()); // ✅ returning timestamp as String
         return dto;
     }
 
