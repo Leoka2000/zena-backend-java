@@ -40,28 +40,32 @@ public class AccelerometerService {
         accelerometer.setX(requestDto.getX());
         accelerometer.setY(requestDto.getY());
         accelerometer.setZ(requestDto.getZ());
+        accelerometer.setTimestamp(requestDto.getTimestamp()); // <-- set from frontend
         accelerometer.setDevice(device);
 
         accelerometerRepository.save(accelerometer);
     }
 
+    
+
     public List<AccelerometerResponseDto> getAccelerometerHistory(String range, Long deviceId) {
-        Instant fromTimestamp = calculateFromTimestamp(range);
+        Long fromTimestamp = calculateFromTimestamp(range);
 
         List<Accelerometer> accelerometers;
 
         if (deviceId != null) {
             if (range != null && !range.isEmpty()) {
                 accelerometers = accelerometerRepository
-                        .findByDevice_IdAndCreatedAtGreaterThanEqualOrderByCreatedAtAsc(deviceId, fromTimestamp);
+                        .findByDevice_IdAndTimestampGreaterThanEqualOrderByTimestampAsc(deviceId, fromTimestamp);
             } else {
-                accelerometers = accelerometerRepository.findByDevice_IdOrderByCreatedAtAsc(deviceId);
+                accelerometers = accelerometerRepository.findByDevice_IdOrderByTimestampAsc(deviceId);
             }
         } else {
             if (range != null && !range.isEmpty()) {
-                accelerometers = accelerometerRepository.findByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(fromTimestamp);
+                accelerometers = accelerometerRepository
+                        .findByTimestampGreaterThanEqualOrderByTimestampAsc(fromTimestamp);
             } else {
-                accelerometers = accelerometerRepository.findAllByOrderByCreatedAtAsc();
+                accelerometers = accelerometerRepository.findAllByOrderByTimestampAsc();
             }
         }
 
@@ -70,20 +74,13 @@ public class AccelerometerService {
                 .collect(Collectors.toList());
     }
 
-    public List<AccelerometerResponseDto> getAllAccelerometerHistory() {
-        List<Accelerometer> accelerometers = accelerometerRepository.findAllByOrderByCreatedAtAsc();
-        return accelerometers.stream()
-                .map(this::convertToResponseDTO)
-                .collect(Collectors.toList());
-    }
-
-    private Instant calculateFromTimestamp(String range) {
-        Instant now = Instant.now();
+    private Long calculateFromTimestamp(String range) {
+        long now = Instant.now().getEpochSecond();
         return switch (range) {
-            case "week" -> now.minusSeconds(7 * 24 * 60 * 60);
-            case "month" -> now.minusSeconds(30L * 24 * 60 * 60);
-            case "3months" -> now.minusSeconds(90L * 24 * 60 * 60);
-            default -> now.minusSeconds(24 * 60 * 60);
+            case "week" -> now - 7 * 24 * 60 * 60;
+            case "month" -> now - 30L * 24 * 60 * 60;
+            case "3months" -> now - 90L * 24 * 60 * 60;
+            default -> now - 24 * 60 * 60;
         };
     }
 
@@ -93,11 +90,12 @@ public class AccelerometerService {
         dto.setY(accelerometer.getY());
         dto.setZ(accelerometer.getZ());
 
-        String isoDate = DateTimeFormatter.ISO_INSTANT
-                .withZone(ZoneId.systemDefault())
-                .format(accelerometer.getCreatedAt());
-        dto.setDate(isoDate);
+        // Convert timestamp to ISO string
+        String isoDate = Instant.ofEpochSecond(accelerometer.getTimestamp())
+                .atZone(ZoneId.systemDefault())
+                .format(DateTimeFormatter.ISO_INSTANT);
 
+        dto.setTimestamp(isoDate);
         return dto;
     }
 

@@ -3,9 +3,6 @@ package zena.systems.demo.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.Instant;
 
 @Getter
 @Setter
@@ -19,19 +16,11 @@ public class Temperature {
     @Column(nullable = false)
     private Float temperature;
 
-    @Column(nullable = true)
+    // Unix timestamp from MCU (in seconds)
+    @Column(nullable = false)
     private Long timestamp;
-
-    @CreationTimestamp
-    @Column(updatable = false)
-    private Instant createdAt;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "device_id", nullable = false)
     private Device device;
-
-   
-
-    
 }

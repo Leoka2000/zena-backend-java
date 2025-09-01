@@ -3,20 +3,17 @@ package zena.systems.demo.repository;
 import zena.systems.demo.model.Accelerometer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.time.Instant;
 import java.util.List;
 
 @Repository
 public interface AccelerometerRepository extends JpaRepository<Accelerometer, Long> {
-    List<Accelerometer> findAllByOrderByCreatedAtAsc();
 
-    List<Accelerometer> findByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(Instant fromTimestamp);
+    List<Accelerometer> findAllByOrderByTimestampAsc();
 
-    List<Accelerometer> findByDevice_IdAndCreatedAtGreaterThanEqualOrderByCreatedAtAsc(Long deviceId,
-            Instant fromCreatedAt);
+    List<Accelerometer> findByTimestampGreaterThanEqualOrderByTimestampAsc(Long fromTimestamp);
 
-    List<Accelerometer> findByDevice_IdOrderByCreatedAtAsc(Long deviceId);
+    List<Accelerometer> findByDevice_IdAndTimestampGreaterThanEqualOrderByTimestampAsc(Long deviceId,
+            Long fromTimestamp);
 
-
-   
+    List<Accelerometer> findByDevice_IdOrderByTimestampAsc(Long deviceId);
 }

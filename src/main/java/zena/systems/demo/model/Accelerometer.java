@@ -28,10 +28,6 @@ public class Accelerometer {
     @Column(nullable = true)
     private Long timestamp;
 
-    @CreationTimestamp
-    @Column(updatable = false)
-    private Instant createdAt;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "device_id", nullable = false)
     private Device device;

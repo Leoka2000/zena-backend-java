@@ -9,5 +9,5 @@ public class AccelerometerResponseDto {
     private Float x;
     private Float y;
     private Float z;
-    private String date; // ISO formatted date string
+    private String timestamp; // ISO formatted date string
 }

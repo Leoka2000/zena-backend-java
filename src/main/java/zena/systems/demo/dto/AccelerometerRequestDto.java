@@ -10,4 +10,5 @@ public class AccelerometerRequestDto {
     private Float y;
     private Float z;
     private Long deviceId;
+    private Long timestamp;
 }

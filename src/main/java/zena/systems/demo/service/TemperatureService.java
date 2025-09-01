@@ -15,10 +15,7 @@ import zena.systems.demo.model.Temperature;
 import zena.systems.demo.repository.DeviceRepository;
 import zena.systems.demo.repository.TemperatureRepository;
 import zena.systems.demo.repository.UserRepository;
-
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,10 +40,8 @@ public class TemperatureService {
 
         Temperature temperature = new Temperature();
         temperature.setTemperature(requestDTO.getTemperature());
-        // We no longer manually set timestamp; createdAt will be populated
-        // automatically
+        temperature.setTimestamp(requestDTO.getTimestamp()); // <-- Use MCU timestamp
         temperature.setDevice(device);
-
 
         temperatureRepository.save(temperature);
 
@@ -60,22 +55,22 @@ public class TemperatureService {
     }
 
     public List<TemperatureResponseDto> getTemperatureHistory(String range, Long deviceId) {
-        Instant fromCreatedAt = calculateFromInstant(range);
+        long fromTimestamp = calculateFromTimestamp(range);
 
         List<Temperature> temperatures;
 
         if (deviceId != null) {
             if (range != null && !range.isEmpty()) {
                 temperatures = temperatureRepository
-                        .findByDevice_IdAndCreatedAtGreaterThanEqualOrderByCreatedAtAsc(deviceId, fromCreatedAt);
+                        .findByDevice_IdAndTimestampGreaterThanEqualOrderByTimestampAsc(deviceId, fromTimestamp);
             } else {
-                temperatures = temperatureRepository.findByDevice_IdOrderByCreatedAtAsc(deviceId);
+                temperatures = temperatureRepository.findByDevice_IdOrderByTimestampAsc(deviceId);
             }
         } else {
             if (range != null && !range.isEmpty()) {
-                temperatures = temperatureRepository.findByCreatedAtGreaterThanEqualOrderByCreatedAtAsc(fromCreatedAt);
+                temperatures = temperatureRepository.findByTimestampGreaterThanEqualOrderByTimestampAsc(fromTimestamp);
             } else {
-                temperatures = temperatureRepository.findAllByOrderByCreatedAtAsc();
+                temperatures = temperatureRepository.findAllByOrderByTimestampAsc();
             }
         }
 
@@ -85,19 +80,20 @@ public class TemperatureService {
     }
 
     public List<TemperatureResponseDto> getAllTemperatureHistory() {
-        List<Temperature> temperatures = temperatureRepository.findAllByOrderByCreatedAtAsc();
+        List<Temperature> temperatures = temperatureRepository.findAllByOrderByTimestampAsc();
         return temperatures.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    private Instant calculateFromInstant(String range) {
-        Instant now = Instant.now();
+    private long calculateFromTimestamp(String range) {
+        long now = Instant.now().getEpochSecond();
         return switch (range) {
-            case "week" -> now.minusSeconds(7 * 24 * 60 * 60);
-            case "month" -> now.minusSeconds(30L * 24 * 60 * 60);
-            case "3months" -> now.minusSeconds(90L * 24 * 60 * 60);
-            default -> now.minusSeconds(24 * 60 * 60);
+            case "day" -> now - 24 * 60 * 60; 
+            case "week" -> now - 7 * 24 * 60 * 60;
+            case "month" -> now - 30L * 24 * 60 * 60;
+            case "3months" -> now - 90L * 24 * 60 * 60;
+            default -> now - 24 * 60 * 60;
         };
     }
 
@@ -105,14 +101,8 @@ public class TemperatureService {
         TemperatureResponseDto dto = new TemperatureResponseDto();
         dto.setTemperature(temperature.getTemperature());
 
-        // Use createdAt instead of timestamp
-        long epochSeconds = temperature.getCreatedAt().getEpochSecond();
+        long epochSeconds = temperature.getTimestamp();
         dto.setTimestamp(epochSeconds);
-
-        String isoDate = DateTimeFormatter.ISO_INSTANT
-                .withZone(ZoneId.systemDefault())
-                .format(temperature.getCreatedAt());
-        dto.setDate(isoDate);
 
         return dto;
     }
