@@ -130,6 +130,7 @@ public class DeviceService {
         dto.setAlarmCharUuid(device.getAlarmCharUuid());
         dto.setRegisteredDevice(device.isRegisteredDevice());
         dto.setCreatedAt(device.getCreatedAt());
+        dto.setLastReceivedTimestamp(device.getLastReceivedTimestamp());
         return dto;
     }
 
@@ -138,4 +139,20 @@ public class DeviceService {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
+
+    @Transactional
+    public DeviceResponseDto updateLastReceivedTimestamp(Long deviceId, Long timestamp) {
+        AppUser user = getCurrentUser();
+        Device device = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
+
+        if (!device.getUser().getId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        device.setLastReceivedTimestamp(timestamp);
+        Device updated = deviceRepository.save(device);
+        return mapToDto(updated);
+    }
+
 }

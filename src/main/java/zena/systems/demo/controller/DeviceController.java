@@ -74,4 +74,10 @@ public ResponseEntity<DeviceResponseDto> registerActiveDevice(
     return ResponseEntity.ok(updatedDevice);
 }
 
+@PatchMapping("/{id}/last-timestamp")
+public ResponseEntity<DeviceResponseDto> updateLastTimestamp(
+        @PathVariable Long id,
+        @RequestParam Long timestamp) {
+    return ResponseEntity.ok(deviceService.updateLastReceivedTimestamp(id, timestamp));
+}
 }

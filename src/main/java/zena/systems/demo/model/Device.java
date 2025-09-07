@@ -40,6 +40,9 @@ public class Device {
     @Column(nullable = true)
     private String alarmCharUuid;
 
+    @Column(name = "last_received_timestamp", nullable = true)
+    private Long lastReceivedTimestamp; 
+
     @Column(name = "isRegisteredDevice", nullable = false)
     private boolean isRegisteredDevice = false;
 

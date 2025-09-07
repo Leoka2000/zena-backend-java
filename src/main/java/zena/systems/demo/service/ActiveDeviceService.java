@@ -66,6 +66,7 @@ public class ActiveDeviceService {
         dto.setLedControlCharUuid(device.getLedControlCharUuid());
         dto.setSleepControlCharUuid(device.getSleepControlCharUuid());
         dto.setAlarmCharUuid(device.getAlarmCharUuid());
+        dto.setLastReceivedTimestamp(device.getLastReceivedTimestamp());
         dto.setRegisteredDevice(device.isRegisteredDevice()); // populate field
         return dto;
     }

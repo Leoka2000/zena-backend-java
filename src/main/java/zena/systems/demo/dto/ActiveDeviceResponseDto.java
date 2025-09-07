@@ -15,6 +15,7 @@ public class ActiveDeviceResponseDto {
     private String setTimeCharUuid;
     private String ledControlCharUuid;
     private String sleepControlCharUuid;
+    private Long lastReceivedTimestamp;
     private String alarmCharUuid;
     private boolean isRegisteredDevice;
 }

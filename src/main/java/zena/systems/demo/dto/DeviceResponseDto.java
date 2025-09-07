@@ -19,5 +19,6 @@ public class DeviceResponseDto {
     private String alarmCharUuid;
     private boolean isRegisteredDevice;
     private Instant createdAt;
+    private Long lastReceivedTimestamp;
 
 }
