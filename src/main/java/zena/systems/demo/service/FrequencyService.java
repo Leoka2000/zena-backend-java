@@ -45,9 +45,17 @@ public class FrequencyService {
         frequency.setFreq3(requestDTO.getFreq3());
         frequency.setFreq4(requestDTO.getFreq4());
         frequency.setTimestamp(requestDTO.getTimestamp());
+
         frequency.setDevice(device);
 
         frequencyRepository.save(frequency);
+
+        device.setLatestFreq1(requestDTO.getFreq1());
+        device.setLatestFreq2(requestDTO.getFreq2());
+        device.setLatestFreq3(requestDTO.getFreq3());
+        device.setLatestFreq4(requestDTO.getFreq4());
+        device.setLastReceivedTimestamp(requestDTO.getTimestamp());
+        deviceRepository.save(device);
 
         logger.info("Received Frequency Data for device {}: {}", requestDTO.getDeviceId(), requestDTO);
     }

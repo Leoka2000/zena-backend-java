@@ -52,4 +52,49 @@ public class Device {
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
+
+
+     // === Tracking fields ===
+  
+    @Column(name = "latest_temperature")
+    private Float latestTemperature;
+
+    @Column(name = "latest_voltage")
+    private Float latestVoltage;
+
+    // accelerometer (x,y,z)
+    @Column(name = "latest_accel_x")
+    private Float latestAccelX;
+
+    @Column(name = "latest_accel_y")
+    private Float latestAccelY;
+
+    @Column(name = "latest_accel_z")
+    private Float latestAccelZ;
+
+    // frequencies
+    @Column(name = "latest_freq1")
+    private Integer latestFreq1;
+
+    @Column(name = "latest_freq2")
+    private Integer latestFreq2;
+
+    @Column(name = "latest_freq3")
+    private Integer latestFreq3;
+
+    @Column(name = "latest_freq4")
+    private Integer latestFreq4;
+
+    // amplitudes
+    @Column(name = "latest_ampl1")
+    private Integer latestAmpl1;
+
+    @Column(name = "latest_ampl2")
+    private Integer latestAmpl2;
+
+    @Column(name = "latest_ampl3")
+    private Integer latestAmpl3;
+
+    @Column(name = "latest_ampl4")
+    private Integer latestAmpl4;
 }

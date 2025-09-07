@@ -6,6 +6,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import zena.systems.demo.dto.DeviceLatestDataDto;
 import zena.systems.demo.dto.DeviceRequestDto;
 import zena.systems.demo.dto.DeviceResponseDto;
 import zena.systems.demo.dto.RegisterDeviceDto;
@@ -131,6 +133,21 @@ public class DeviceService {
         dto.setRegisteredDevice(device.isRegisteredDevice());
         dto.setCreatedAt(device.getCreatedAt());
         dto.setLastReceivedTimestamp(device.getLastReceivedTimestamp());
+
+        dto.setLatestTemperature(device.getLatestTemperature());
+        dto.setLatestVoltage(device.getLatestVoltage());
+        dto.setLatestAccelX(device.getLatestAccelX());
+        dto.setLatestAccelY(device.getLatestAccelY());
+        dto.setLatestAccelZ(device.getLatestAccelZ());
+        dto.setLatestFreq1(device.getLatestFreq1());
+        dto.setLatestFreq2(device.getLatestFreq2());
+        dto.setLatestFreq3(device.getLatestFreq3());
+        dto.setLatestFreq4(device.getLatestFreq4());
+        dto.setLatestAmpl1(device.getLatestAmpl1());
+        dto.setLatestAmpl2(device.getLatestAmpl2());
+        dto.setLatestAmpl3(device.getLatestAmpl3());
+        dto.setLatestAmpl4(device.getLatestAmpl4());
+
         return dto;
     }
 
@@ -151,6 +168,46 @@ public class DeviceService {
         }
 
         device.setLastReceivedTimestamp(timestamp);
+        Device updated = deviceRepository.save(device);
+        return mapToDto(updated);
+    }
+
+    @Transactional
+    public DeviceResponseDto updateLatestData(DeviceLatestDataDto dto) {
+        Device device = deviceRepository.findById(dto.getDeviceId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
+
+        // Update latest values
+        if (dto.getTemperature() != null)
+            device.setLatestTemperature(dto.getTemperature());
+        if (dto.getVoltage() != null)
+            device.setLatestVoltage(dto.getVoltage());
+        if (dto.getAccelX() != null)
+            device.setLatestAccelX(dto.getAccelX());
+        if (dto.getAccelY() != null)
+            device.setLatestAccelY(dto.getAccelY());
+        if (dto.getAccelZ() != null)
+            device.setLatestAccelZ(dto.getAccelZ());
+        if (dto.getFreq1() != null)
+            device.setLatestFreq1(dto.getFreq1());
+        if (dto.getFreq2() != null)
+            device.setLatestFreq2(dto.getFreq2());
+        if (dto.getFreq3() != null)
+            device.setLatestFreq3(dto.getFreq3());
+        if (dto.getFreq4() != null)
+            device.setLatestFreq4(dto.getFreq4());
+        if (dto.getAmpl1() != null)
+            device.setLatestAmpl1(dto.getAmpl1());
+        if (dto.getAmpl2() != null)
+            device.setLatestAmpl2(dto.getAmpl2());
+        if (dto.getAmpl3() != null)
+            device.setLatestAmpl3(dto.getAmpl3());
+        if (dto.getAmpl4() != null)
+            device.setLatestAmpl4(dto.getAmpl4());
+
+        // Always update timestamp
+        device.setLastReceivedTimestamp(System.currentTimeMillis());
+
         Device updated = deviceRepository.save(device);
         return mapToDto(updated);
     }

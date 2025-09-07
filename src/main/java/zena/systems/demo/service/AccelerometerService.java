@@ -40,13 +40,18 @@ public class AccelerometerService {
         accelerometer.setX(requestDto.getX());
         accelerometer.setY(requestDto.getY());
         accelerometer.setZ(requestDto.getZ());
-        accelerometer.setTimestamp(requestDto.getTimestamp()); // <-- set from frontend
+        accelerometer.setTimestamp(requestDto.getTimestamp());
         accelerometer.setDevice(device);
 
         accelerometerRepository.save(accelerometer);
-    }
 
-    
+        // ✅ Update latest values on Device
+        device.setLatestAccelX(requestDto.getX());
+        device.setLatestAccelY(requestDto.getY());
+        device.setLatestAccelZ(requestDto.getZ());
+        device.setLastReceivedTimestamp(requestDto.getTimestamp());
+        deviceRepository.save(device);
+    }
 
     public List<AccelerometerResponseDto> getAccelerometerHistory(String range, Long deviceId) {
         Long fromTimestamp = calculateFromTimestamp(range);

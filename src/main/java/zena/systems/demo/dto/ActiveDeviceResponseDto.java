@@ -18,4 +18,19 @@ public class ActiveDeviceResponseDto {
     private Long lastReceivedTimestamp;
     private String alarmCharUuid;
     private boolean isRegisteredDevice;
+
+    // ✅ Latest sensor values
+    private Float latestTemperature;
+    private Float latestVoltage;
+    private Float latestAccelX;
+    private Float latestAccelY;
+    private Float latestAccelZ;
+    private Integer latestFreq1;
+    private Integer latestFreq2;
+    private Integer latestFreq3;
+    private Integer latestFreq4;
+    private Integer latestAmpl1;
+    private Integer latestAmpl2;
+    private Integer latestAmpl3;
+    private Integer latestAmpl4;
 }

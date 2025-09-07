@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import zena.systems.demo.dto.ActiveDeviceResponseDto;
+import zena.systems.demo.dto.DeviceLatestDataDto;
 import zena.systems.demo.dto.DeviceRequestDto;
 import zena.systems.demo.dto.DeviceResponseDto;
 import zena.systems.demo.dto.RegisterDeviceDto;
@@ -65,19 +66,26 @@ public class DeviceController {
         ActiveDeviceResponseDto dto = activeDeviceService.getActiveDevice(user);
         return ResponseEntity.ok(dto);
     }
+
     @PatchMapping("/register")
-public ResponseEntity<DeviceResponseDto> registerActiveDevice(
-        @AuthenticationPrincipal AppUser user,
-        @RequestBody RegisterDeviceDto dto) {
+    public ResponseEntity<DeviceResponseDto> registerActiveDevice(
+            @AuthenticationPrincipal AppUser user,
+            @RequestBody RegisterDeviceDto dto) {
 
-    DeviceResponseDto updatedDevice = deviceService.registerActiveDevice(user, dto);
-    return ResponseEntity.ok(updatedDevice);
-}
+        DeviceResponseDto updatedDevice = deviceService.registerActiveDevice(user, dto);
+        return ResponseEntity.ok(updatedDevice);
+    }
 
-@PatchMapping("/{id}/last-timestamp")
-public ResponseEntity<DeviceResponseDto> updateLastTimestamp(
-        @PathVariable Long id,
-        @RequestParam Long timestamp) {
-    return ResponseEntity.ok(deviceService.updateLastReceivedTimestamp(id, timestamp));
-}
+    @PatchMapping("/{id}/last-timestamp")
+    public ResponseEntity<DeviceResponseDto> updateLastTimestamp(
+            @PathVariable Long id,
+            @RequestParam Long timestamp) {
+        return ResponseEntity.ok(deviceService.updateLastReceivedTimestamp(id, timestamp));
+    }
+
+    @PatchMapping("/update-latest")
+    public ResponseEntity<DeviceResponseDto> updateLatestData(
+            @RequestBody DeviceLatestDataDto dto) {
+        return ResponseEntity.ok(deviceService.updateLatestData(dto));
+    }
 }

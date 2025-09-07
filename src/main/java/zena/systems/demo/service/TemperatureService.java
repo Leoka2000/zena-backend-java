@@ -45,6 +45,10 @@ public class TemperatureService {
 
         temperatureRepository.save(temperature);
 
+        device.setLatestTemperature(requestDTO.getTemperature());
+        device.setLastReceivedTimestamp(requestDTO.getTimestamp());
+        deviceRepository.save(device);
+
         logger.info("Received Temperature Data for device {}: {}", requestDTO.getDeviceId(), requestDTO);
     }
 
@@ -89,7 +93,7 @@ public class TemperatureService {
     private long calculateFromTimestamp(String range) {
         long now = Instant.now().getEpochSecond();
         return switch (range) {
-            case "day" -> now - 24 * 60 * 60; 
+            case "day" -> now - 24 * 60 * 60;
             case "week" -> now - 7 * 24 * 60 * 60;
             case "month" -> now - 30L * 24 * 60 * 60;
             case "3months" -> now - 90L * 24 * 60 * 60;

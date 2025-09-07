@@ -46,6 +46,10 @@ public class VoltageService {
 
         voltageRepository.save(voltage);
 
+        device.setLatestVoltage(requestDTO.getVoltage());
+        device.setLastReceivedTimestamp(requestDTO.getTimestamp());
+        deviceRepository.save(device);
+
         logger.info("Received Voltage Data for device {}: {}", requestDTO.getDeviceId(), requestDTO);
     }
 

@@ -49,6 +49,13 @@ public class AmplitudeService {
 
         amplitudeRepository.save(amplitude);
 
+        device.setLatestAmpl1(requestDTO.getAmpl1());
+        device.setLatestAmpl2(requestDTO.getAmpl2());
+        device.setLatestAmpl3(requestDTO.getAmpl3());
+        device.setLatestAmpl4(requestDTO.getAmpl4());
+        device.setLastReceivedTimestamp(requestDTO.getTimestamp());
+        deviceRepository.save(device);
+
         logger.info("Received Amplitude Data for device {}: {}", requestDTO.getDeviceId(), requestDTO);
     }
 
