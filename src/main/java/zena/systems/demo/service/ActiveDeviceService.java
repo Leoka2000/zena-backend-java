@@ -49,7 +49,6 @@ public class ActiveDeviceService {
         return mapToActiveDeviceDto(activeDevice.getDevice());
     }
 
-    // Expose ActiveDevice entity for registering
     public ActiveDevice getActiveDeviceEntity(AppUser user) {
         return activeDeviceRepository.findByUser(user);
     }
@@ -67,7 +66,22 @@ public class ActiveDeviceService {
         dto.setSleepControlCharUuid(device.getSleepControlCharUuid());
         dto.setAlarmCharUuid(device.getAlarmCharUuid());
         dto.setLastReceivedTimestamp(device.getLastReceivedTimestamp());
-        dto.setRegisteredDevice(device.isRegisteredDevice()); // populate field
+        dto.setRegisteredDevice(device.isRegisteredDevice());
+        dto.setLatestTemperature(device.getLatestTemperature());
+        dto.setLatestVoltage(device.getLatestVoltage());
+        dto.setLatestAccelX(device.getLatestAccelX());
+        dto.setLatestAccelY(device.getLatestAccelY());
+        dto.setLatestAccelZ(device.getLatestAccelZ());
+        dto.setLatestFreq1(device.getLatestFreq1());
+        dto.setLatestFreq2(device.getLatestFreq2());
+        dto.setLatestFreq3(device.getLatestFreq3());
+        dto.setLatestFreq4(device.getLatestFreq4());
+        dto.setLatestAmpl1(device.getLatestAmpl1());
+        dto.setLatestAmpl2(device.getLatestAmpl2());
+        dto.setLatestAmpl3(device.getLatestAmpl3());
+        dto.setLatestAmpl4(device.getLatestAmpl4());
+
         return dto;
     }
+
 }
