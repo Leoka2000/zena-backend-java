@@ -76,12 +76,6 @@ public class DeviceController {
         return ResponseEntity.ok(updatedDevice);
     }
 
-    @PatchMapping("/{id}/last-timestamp")
-    public ResponseEntity<DeviceResponseDto> updateLastTimestamp(
-            @PathVariable Long id,
-            @RequestParam Long timestamp) {
-        return ResponseEntity.ok(deviceService.updateLastReceivedTimestamp(id, timestamp));
-    }
 
     @PatchMapping("/update-latest")
     public ResponseEntity<DeviceResponseDto> updateLatestData(

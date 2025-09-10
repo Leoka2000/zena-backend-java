@@ -20,4 +20,5 @@ public class DeviceLatestDataDto {
     private Integer ampl2;
     private Integer ampl3;
     private Integer ampl4;
+    private Long lastReceivedTimestamp;
 }

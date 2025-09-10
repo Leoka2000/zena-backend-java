@@ -205,11 +205,14 @@ public class DeviceService {
         if (dto.getAmpl4() != null)
             device.setLatestAmpl4(dto.getAmpl4());
 
-        // Always update timestamp
-        device.setLastReceivedTimestamp(System.currentTimeMillis());
+     
+        if (dto.getLastReceivedTimestamp() != null) {
+            device.setLastReceivedTimestamp(dto.getLastReceivedTimestamp());
+        } else {
+            device.setLastReceivedTimestamp(System.currentTimeMillis());
+        }
 
         Device updated = deviceRepository.save(device);
         return mapToDto(updated);
     }
-
 }
